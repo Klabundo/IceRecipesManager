@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eis-Rezepte</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>🍦 Eis-Rezepte App 🍨</h1>
+    </header>
+
+    <main>
+        <section id="add-recipe-section">
+            <h2>Neues Rezept hinzufügen</h2>
+            <form id="recipe-form">
+                <div class="form-group">
+                    <label for="title">Titel des Eises:</label>
+                    <input type="text" id="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="ingredients">Zutaten:</label>
+                    <textarea id="ingredients" rows="4" required placeholder="Zutaten hier eintragen..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="instructions">Zubereitung:</label>
+                    <textarea id="instructions" rows="4" required placeholder="Schritt-für-Schritt Anleitung..."></textarea>
+                </div>
+                <button type="submit">Rezept speichern</button>
+            </form>
+        </section>
+
+        <section id="search-section">
+            <h2>Rezepte durchsuchen</h2>
+            <input type="text" id="search-input" placeholder="Nach Rezepten suchen...">
+        </section>
+
+        <section id="recipes-list-section">
+            <h2>Alle Eis-Rezepte</h2>
+            <div id="recipes-container">
+                <!-- Rezepte werden hier per JS geladen -->
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

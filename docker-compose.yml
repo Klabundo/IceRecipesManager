@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  ice-cream-app:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      # Mounten der Datenbankdatei auf den Host, damit Daten nach einem Neustart nicht verloren gehen
+      - ./data:/usr/src/app/data
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
