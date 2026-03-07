@@ -4,7 +4,9 @@ function AiSettings() {
   const [hostUrl, setHostUrl] = useState('http://localhost:11434');
   const [model, setModel] = useState('llama3');
   const [systemPrompt, setSystemPrompt] = useState('Du bist ein professioneller Eismacher und Experte für kreative Eisrezepte.');
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [availableModels, setAvailableModels] = useState([]);
+  const [isLoadingModels, setIsLoadingModels] = useState(false);
 
   useEffect(() => {
     const storedHostUrl = localStorage.getItem('ai_host_url');
@@ -16,64 +18,130 @@ function AiSettings() {
     if (storedSystemPrompt) setSystemPrompt(storedSystemPrompt);
   }, []);
 
+  const fetchModels = async (url) => {
+    setIsLoadingModels(true);
+    try {
+      const response = await fetch('/api/ai/models', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ hostUrl: url })
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setAvailableModels(data.models || []);
+      } else {
+        setAvailableModels([]);
+      }
+    } catch (error) {
+      console.error('Fehler beim Laden der Modelle:', error);
+      setAvailableModels([]);
+    } finally {
+      setIsLoadingModels(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchModels(hostUrl);
+    }
+  }, [isOpen]);
+
+  const handleHostUrlChange = (e) => {
+    const newUrl = e.target.value;
+    setHostUrl(newUrl);
+  };
+
+  const handleHostUrlBlur = () => {
+    fetchModels(hostUrl);
+  };
+
   const handleSave = (e) => {
     e.preventDefault();
     localStorage.setItem('ai_host_url', hostUrl);
     localStorage.setItem('ai_model', model);
     localStorage.setItem('ai_system_prompt', systemPrompt);
     alert('AI-Einstellungen gespeichert!');
+    setIsOpen(false);
   };
 
   return (
-    <div className="card settings-section" style={{ marginTop: '1rem' }}>
-      <h2
-        className="section-title"
-        style={{ cursor: 'pointer', marginBottom: isExpanded ? '1rem' : '0' }}
-        onClick={() => setIsExpanded(!isExpanded)}
+    <>
+      <button
+        className="settings-gear-btn"
+        onClick={() => setIsOpen(true)}
+        title="AI Einstellungen"
       >
-        🤖 AI Einstellungen {isExpanded ? '🔽' : '▶️'}
-      </h2>
+        ⚙️
+      </button>
 
-      {isExpanded && (
-        <form onSubmit={handleSave} className="recipe-form">
-          <div className="form-group">
-            <label htmlFor="hostUrl">Ollama Host URL</label>
-            <input
-              type="url"
-              id="hostUrl"
-              className="form-control"
-              placeholder="http://localhost:11434"
-              value={hostUrl}
-              onChange={(e) => setHostUrl(e.target.value)}
-            />
+      {isOpen && (
+        <div className="modal-overlay" onClick={() => setIsOpen(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>🤖 AI Einstellungen</h2>
+              <button className="modal-close" onClick={() => setIsOpen(false)}>✖</button>
+            </div>
+
+            <div className="modal-body">
+              <form onSubmit={handleSave} className="recipe-form">
+                <div className="form-group">
+                  <label htmlFor="hostUrl">Ollama Host URL</label>
+                  <input
+                    type="url"
+                    id="hostUrl"
+                    className="form-control"
+                    placeholder="http://localhost:11434"
+                    value={hostUrl}
+                    onChange={handleHostUrlChange}
+                    onBlur={handleHostUrlBlur}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="model">Model {isLoadingModels && '⏳'}</label>
+                  {availableModels.length > 0 ? (
+                    <select
+                      id="model"
+                      className="form-control"
+                      value={model}
+                      onChange={(e) => setModel(e.target.value)}
+                    >
+                      {availableModels.map((m) => (
+                        <option key={m} value={m}>{m}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      type="text"
+                      id="model"
+                      className="form-control"
+                      placeholder="z.B. llama3, mistral, gemma"
+                      value={model}
+                      onChange={(e) => setModel(e.target.value)}
+                    />
+                  )}
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="systemPrompt">System Prompt</label>
+                  <textarea
+                    id="systemPrompt"
+                    className="form-control"
+                    rows="4"
+                    value={systemPrompt}
+                    onChange={(e) => setSystemPrompt(e.target.value)}
+                  ></textarea>
+                </div>
+
+                <button type="submit" className="btn btn-primary" style={{ marginTop: '1rem' }}>
+                  Einstellungen speichern 💾
+                </button>
+              </form>
+            </div>
           </div>
-          <div className="form-group">
-            <label htmlFor="model">Model</label>
-            <input
-              type="text"
-              id="model"
-              className="form-control"
-              placeholder="z.B. llama3, mistral, gemma"
-              value={model}
-              onChange={(e) => setModel(e.target.value)}
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="systemPrompt">System Prompt</label>
-            <textarea
-              id="systemPrompt"
-              className="form-control"
-              rows="3"
-              value={systemPrompt}
-              onChange={(e) => setSystemPrompt(e.target.value)}
-            ></textarea>
-          </div>
-          <button type="submit" className="btn btn-primary">
-            Einstellungen speichern 💾
-          </button>
-        </form>
+        </div>
       )}
-    </div>
+    </>
   );
 }
 
