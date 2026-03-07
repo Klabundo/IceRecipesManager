@@ -85,6 +85,86 @@ app.post('/api/recipes/:id/downvote', (req, res) => {
     });
 });
 
+// 5. Kommentare zu einem Rezept abrufen
+app.get('/api/recipes/:id/comments', (req, res) => {
+    const recipeId = req.params.id;
+    const query = `SELECT * FROM comments WHERE recipe_id = ? ORDER BY created_at DESC`;
+    db.all(query, [recipeId], (err, rows) => {
+        if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
+        res.json({ data: rows });
+    });
+});
+
+// 6. Kommentar zu einem Rezept hinzufügen
+app.post('/api/recipes/:id/comments', (req, res) => {
+    const recipeId = req.params.id;
+    const { text } = req.body;
+
+    if (!text) {
+        res.status(400).json({ error: 'Bitte Kommentartext angeben.' });
+        return;
+    }
+
+    const query = `INSERT INTO comments (recipe_id, text) VALUES (?, ?)`;
+    db.run(query, [recipeId, text], function(err) {
+        if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
+        res.status(201).json({
+            id: this.lastID,
+            recipe_id: recipeId,
+            text,
+            created_at: new Date().toISOString()
+        });
+    });
+});
+
+// 7. AI Chat Proxy
+app.post('/api/ai/chat', async (req, res) => {
+    const { apiKey, model, systemPrompt, userPrompt } = req.body;
+
+    if (!apiKey || !model || !userPrompt) {
+        res.status(400).json({ error: 'Bitte API Key, Modell und User Prompt angeben.' });
+        return;
+    }
+
+    try {
+        const fetch = (await import('node-fetch')).default;
+
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({
+                model: model,
+                messages: [
+                    { role: 'system', content: systemPrompt || 'Du bist ein hilfreicher Assistent.' },
+                    { role: 'user', content: userPrompt }
+                ],
+                temperature: 0.7
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            res.status(response.status).json({ error: data.error?.message || 'Fehler bei der AI-Anfrage.' });
+            return;
+        }
+
+        res.json({ result: data.choices[0].message.content });
+    } catch (error) {
+        console.error('Fehler beim AI Call:', error);
+        res.status(500).json({ error: 'Interner Serverfehler bei der AI-Anfrage.' });
+    }
+});
+
 // Start Server
 app.listen(PORT, () => {
     console.log(`Server läuft auf Port ${PORT}`);

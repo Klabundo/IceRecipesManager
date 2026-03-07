@@ -31,6 +31,21 @@ const db = new sqlite3.Database(dbPath, (err) => {
                 console.log('Tabelle "recipes" ist bereit.');
             }
         });
+
+        // Kommentare Tabelle erstellen
+        db.run(`CREATE TABLE IF NOT EXISTS comments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            recipe_id INTEGER NOT NULL,
+            text TEXT NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (recipe_id) REFERENCES recipes(id)
+        )`, (err) => {
+            if (err) {
+                console.error('Fehler beim Erstellen der Kommentare-Tabelle', err.message);
+            } else {
+                console.log('Tabelle "comments" ist bereit.');
+            }
+        });
     }
 });
 
