@@ -1,0 +1,4 @@
+Server läuft auf Port 3000
+Mit der SQLite-Datenbank verbunden. Pfad: /app/data/recipes.db
+Tabelle "recipes" ist bereit.
+Tabelle "comments" ist bereit.

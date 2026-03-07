@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import RecipeForm from './components/RecipeForm';
 import RecipeList from './components/RecipeList';
+import AiSettings from './components/AiSettings';
 import './index.css';
 
 function App() {
@@ -49,6 +50,8 @@ function App() {
       </header>
 
       <main className="app-main">
+        <AiSettings />
+
         <section className="card form-section">
           <h2 className="section-title">🍦 Neues Rezept kreieren</h2>
           <RecipeForm onRecipeAdded={fetchRecipes} />
