@@ -1,12 +1,11 @@
 const express = require('express');
-const bodyParser = require('body-parser');
 const db = require('./database');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(bodyParser.json());
+app.use(express.json()); // Built-in middleware for parsing JSON
 app.use(express.static('frontend/dist')); // Ordner für das React-Frontend
 
 // === API Routen ===
