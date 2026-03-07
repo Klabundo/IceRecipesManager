@@ -7,6 +7,7 @@ import './index.css';
 function App() {
   const [recipes, setRecipes] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState('popular'); // 'popular' or 'newest'
 
   // Rezepte laden
   const fetchRecipes = async () => {
@@ -40,7 +41,19 @@ function App() {
     (r) =>
       r.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       r.ingredients.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ).sort((a, b) => {
+    if (sortBy === 'newest') {
+      return new Date(b.created_at) - new Date(a.created_at);
+    }
+    // Default is popular (score is already calculated in backend, but we can recalculate or use it if present)
+    const scoreA = (a.upvotes || 0) - (a.downvotes || 0);
+    const scoreB = (b.upvotes || 0) - (b.downvotes || 0);
+    if (scoreB !== scoreA) {
+      return scoreB - scoreA;
+    }
+    // Fallback to newest if scores are equal
+    return new Date(b.created_at) - new Date(a.created_at);
+  });
 
   return (
     <div className="app-container">
@@ -69,9 +82,20 @@ function App() {
         </section>
 
         <section className="list-section">
-          <h2 className="section-title" style={{ paddingLeft: '1rem', marginTop: '1rem' }}>
-            🍨 Community Favoriten
-          </h2>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingLeft: '1rem', marginTop: '1rem', marginBottom: '1.5rem' }}>
+            <h2 className="section-title" style={{ margin: 0 }}>
+              🍨 Community Favoriten
+            </h2>
+            <select
+              className="form-control"
+              style={{ width: 'auto', padding: '0.5rem 1rem' }}
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+            >
+              <option value="popular">🔥 Beliebteste</option>
+              <option value="newest">🆕 Neueste</option>
+            </select>
+          </div>
           <RecipeList recipes={filteredRecipes} onVote={handleVote} />
         </section>
       </main>

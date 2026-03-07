@@ -20,6 +20,17 @@ function RecipeCard({ recipe, onVote }) {
     sessionStorage.setItem(sessionKey, 'true');
   };
 
+  const handleCopyRecipe = async () => {
+    const textToCopy = `🍨 ${recipe.title} 🍨\n\n🛒 Einkaufszettel:\n${recipe.ingredients}\n\n👩‍🍳 So wird's gemacht:\n${recipe.instructions}`;
+    try {
+      await navigator.clipboard.writeText(textToCopy);
+      alert('Rezept in die Zwischenablage kopiert! 📋');
+    } catch (err) {
+      console.error('Fehler beim Kopieren: ', err);
+      alert('Kopieren fehlgeschlagen.');
+    }
+  };
+
   return (
     <>
       <div className="recipe-item">
@@ -60,8 +71,18 @@ function RecipeCard({ recipe, onVote }) {
         <div className="modal-overlay" onClick={() => setIsExpanded(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2 style={{ fontSize: '1.5rem' }}>{recipe.title}</h2>
-              <button className="modal-close" onClick={() => setIsExpanded(false)}>✖</button>
+              <h2 style={{ fontSize: '1.5rem', marginRight: '1rem' }}>{recipe.title}</h2>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button
+                  className="btn"
+                  onClick={handleCopyRecipe}
+                  style={{ padding: '0.5rem', fontSize: '1rem', backgroundColor: 'var(--bg-color)', color: 'var(--text-main)' }}
+                  title="Rezept kopieren"
+                >
+                  📋
+                </button>
+                <button className="modal-close" onClick={() => setIsExpanded(false)}>✖</button>
+              </div>
             </div>
             <div className="modal-body recipe-body">
               <h4>🛒 Einkaufszettel</h4>
