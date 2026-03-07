@@ -7,7 +7,7 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(bodyParser.json());
-app.use(express.static('public')); // Ordner für das Frontend
+app.use(express.static('frontend/dist')); // Ordner für das React-Frontend
 
 // === API Routen ===
 

@@ -1,17 +1,26 @@
-# Basis-Image von Node.js
+# --- Stage 1: Build React Frontend ---
+FROM node:18-alpine AS frontend-build
+
+WORKDIR /usr/src/app/frontend
+COPY frontend/package*.json ./
+RUN npm install
+COPY frontend/ ./
+RUN npm run build
+
+# --- Stage 2: Build Node.js Backend ---
 FROM node:18-alpine
 
-# Arbeitsverzeichnis im Container
 WORKDIR /usr/src/app
 
-# package.json und package-lock.json kopieren
+# Backend package.json kopieren und installieren
 COPY package*.json ./
-
-# Abhängigkeiten installieren
 RUN npm install
 
-# Quellcode und statische Dateien kopieren
-COPY . .
+# Backend Code kopieren
+COPY server.js database.js ./
+
+# Erstellte Frontend-Dateien aus Stage 1 kopieren
+COPY --from=frontend-build /usr/src/app/frontend/dist ./frontend/dist
 
 # Port freigeben, auf dem die App läuft
 EXPOSE 3000

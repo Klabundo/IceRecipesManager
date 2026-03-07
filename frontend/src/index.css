@@ -1,0 +1,228 @@
+:root {
+  --primary-color: #e65c99;
+  --primary-hover: #cc0066;
+  --bg-color: #fdf6e3;
+  --card-bg: #ffffff;
+  --text-color: #333333;
+  --border-color: #e0e0e0;
+  --upvote-color: #4CAF50;
+  --downvote-color: #f44336;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.app-container {
+  min-height: 100vh;
+}
+
+.app-header {
+  background-color: #ff99cc;
+  color: white;
+  text-align: center;
+  padding: 1.5rem 0;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 2.5rem;
+  letter-spacing: 1px;
+}
+
+.app-main {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 20px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.card {
+  background: var(--card-bg);
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border-color);
+}
+
+.card h2 {
+  color: var(--primary-color);
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #ff99cc;
+  font-size: 1.5rem;
+}
+
+/* Forms */
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.form-control,
+.search-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+  font-family: inherit;
+}
+
+.form-control:focus,
+.search-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(230, 92, 153, 0.2);
+}
+
+textarea.form-control {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: white;
+  width: 100%;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+}
+
+.btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Recipes List */
+.recipes-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.recipe-item {
+  background-color: #fafafa;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 1.5rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.recipe-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+}
+
+.recipe-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.recipe-title {
+  margin: 0;
+  font-size: 1.4rem;
+  color: var(--text-color);
+}
+
+.recipe-score {
+  font-weight: bold;
+  font-size: 1.1rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  background-color: #eee;
+}
+
+.score-positive { color: var(--upvote-color); background-color: rgba(76, 175, 80, 0.1); }
+.score-negative { color: var(--downvote-color); background-color: rgba(244, 67, 54, 0.1); }
+.score-neutral { color: #666; }
+
+.recipe-body h4 {
+  margin: 1rem 0 0.5rem;
+  color: #555;
+}
+
+.recipe-body p {
+  margin: 0;
+  white-space: pre-wrap;
+  color: #444;
+  line-height: 1.5;
+}
+
+.recipe-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+}
+
+.btn-vote {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.95rem;
+}
+
+.btn-up {
+  background-color: white;
+  color: var(--upvote-color);
+  border: 1px solid var(--upvote-color);
+}
+.btn-up:hover { background-color: var(--upvote-color); color: white; }
+
+.btn-down {
+  background-color: white;
+  color: var(--downvote-color);
+  border: 1px solid var(--downvote-color);
+}
+.btn-down:hover { background-color: var(--downvote-color); color: white; }
+
+.recipe-meta {
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  color: #999;
+  text-align: right;
+}
+
+.no-recipes {
+  text-align: center;
+  color: #666;
+  font-style: italic;
+  padding: 2rem 0;
+}
