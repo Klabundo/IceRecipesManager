@@ -4,19 +4,19 @@ function RecipeCard({ recipe, onVote }) {
     score > 0 ? 'score-positive' : score < 0 ? 'score-negative' : 'score-neutral';
 
   return (
-    <div className="recipe-item card">
+    <div className="recipe-item">
       <div className="recipe-header">
         <h3 className="recipe-title">{recipe.title}</h3>
         <div className={`recipe-score ${scoreClass}`}>
-          Score: {score}
+          {score > 0 ? '🔥' : score < 0 ? '🧊' : '⭐'} {score}
         </div>
       </div>
 
       <div className="recipe-body">
-        <h4>Zutaten:</h4>
+        <h4>🛒 Einkaufszettel</h4>
         <p>{recipe.ingredients}</p>
 
-        <h4>Zubereitung:</h4>
+        <h4>👩‍🍳 So wird's gemacht</h4>
         <p>{recipe.instructions}</p>
       </div>
 
@@ -26,19 +26,19 @@ function RecipeCard({ recipe, onVote }) {
           onClick={() => onVote(recipe.id, 'upvote')}
           title="Lecker!"
         >
-          👍 {recipe.upvotes}
+          😍 {recipe.upvotes}
         </button>
         <button
           className="btn btn-vote btn-down"
           onClick={() => onVote(recipe.id, 'downvote')}
           title="Schmeckt mir nicht"
         >
-          👎 {recipe.downvotes}
+          🤢 {recipe.downvotes}
         </button>
       </div>
 
       <div className="recipe-meta">
-        Hinzugefügt am: {new Date(recipe.created_at).toLocaleString()}
+        Teilte das Rezept am: {new Date(recipe.created_at).toLocaleString('de-DE', { dateStyle: 'long', timeStyle: 'short' })}
       </div>
     </div>
   );

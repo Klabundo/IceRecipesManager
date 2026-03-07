@@ -4,7 +4,8 @@ function RecipeList({ recipes, onVote }) {
   if (recipes.length === 0) {
     return (
       <div className="no-recipes">
-        <p>Noch keine Rezepte vorhanden oder Suche ergab keine Treffer.</p>
+        <p>Noch keine passenden Eis-Rezepte gefunden.</p>
+        <small>Sei der/die Erste und kreiere etwas Leckeres! 🍧</small>
       </div>
     );
   }

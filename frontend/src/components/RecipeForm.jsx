@@ -38,43 +38,43 @@ function RecipeForm({ onRecipeAdded }) {
   return (
     <form onSubmit={handleSubmit} className="recipe-form">
       <div className="form-group">
-        <label htmlFor="title">Titel des Eises:</label>
+        <label htmlFor="title">Eis-Titel</label>
         <input
           type="text"
           id="title"
           className="form-control"
           required
-          placeholder="z.B. Stracciatella Traum"
+          placeholder="z.B. Stracciatella Wolke 7"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
       </div>
       <div className="form-group">
-        <label htmlFor="ingredients">Zutaten:</label>
+        <label htmlFor="ingredients">Was kommt rein? (Zutaten)</label>
         <textarea
           id="ingredients"
           className="form-control"
-          rows="4"
+          rows="3"
           required
-          placeholder="500ml Milch, 100g Schokolade..."
+          placeholder="500ml Vollmilch&#10;100g feinste Schokolade..."
           value={ingredients}
           onChange={(e) => setIngredients(e.target.value)}
         ></textarea>
       </div>
       <div className="form-group">
-        <label htmlFor="instructions">Zubereitung:</label>
+        <label htmlFor="instructions">Wie wird es gemacht? (Zubereitung)</label>
         <textarea
           id="instructions"
           className="form-control"
           rows="4"
           required
-          placeholder="Milch aufkochen, Schokolade reiben..."
+          placeholder="1. Milch sanft aufkochen&#10;2. Schokolade unterheben..."
           value={instructions}
           onChange={(e) => setInstructions(e.target.value)}
         ></textarea>
       </div>
       <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
-        {isSubmitting ? 'Speichern...' : 'Rezept speichern'}
+        {isSubmitting ? 'Wird gespeichert...' : 'Rezept teilen ✨'}
       </button>
     </form>
   );

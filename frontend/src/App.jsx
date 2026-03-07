@@ -44,28 +44,31 @@ function App() {
   return (
     <div className="app-container">
       <header className="app-header">
-        <h1>🍦 Eis-Rezepte App 🍨</h1>
+        <h1>✨ Eis-Rezepte</h1>
+        <p>Die süßeste Sammlung der Welt</p>
       </header>
 
       <main className="app-main">
         <section className="card form-section">
-          <h2>Neues Rezept hinzufügen</h2>
+          <h2 className="section-title">🍦 Neues Rezept kreieren</h2>
           <RecipeForm onRecipeAdded={fetchRecipes} />
         </section>
 
         <section className="card search-section">
-          <h2>Rezepte durchsuchen</h2>
+          <h2 className="section-title">🔍 Rezepte finden</h2>
           <input
             type="text"
             className="search-input"
-            placeholder="Nach Rezepten suchen..."
+            placeholder="Zutaten, Titel oder Geschmack..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </section>
 
-        <section className="card list-section">
-          <h2>Alle Eis-Rezepte</h2>
+        <section className="list-section">
+          <h2 className="section-title" style={{ paddingLeft: '1rem', marginTop: '1rem' }}>
+            🍨 Community Favoriten
+          </h2>
           <RecipeList recipes={filteredRecipes} onVote={handleVote} />
         </section>
       </main>
