@@ -1,0 +1,18 @@
+Server läuft auf Port 3000
+Mit der SQLite-Datenbank verbunden. Pfad: /app/data/recipes.db
+Tabelle "comments" ist bereit.
+Tabelle "recipes" ist bereit.
+Fehler beim AI Call: FetchError: request to http://localhost:11434/api/chat failed, reason:
+    at ClientRequest.<anonymous> (file:///app/node_modules/node-fetch/src/index.js:108:11)
+    at ClientRequest.emit (node:events:531:35)
+    at emitErrorEvent (node:_http_client:107:11)
+    at Socket.socketErrorListener (node:_http_client:574:5)
+    at Socket.emit (node:events:519:28)
+    at emitErrorNT (node:internal/streams/destroy:170:8)
+    at emitErrorCloseNT (node:internal/streams/destroy:129:3)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  type: 'system',
+  errno: 'ECONNREFUSED',
+  code: 'ECONNREFUSED',
+  erroredSysCall: undefined
+}

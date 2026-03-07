@@ -44,11 +44,11 @@ function RecipeCard({ recipe, onVote }) {
           <button
             className="btn"
             onClick={async () => {
-              const apiKey = localStorage.getItem('ai_api_key');
-              const model = localStorage.getItem('ai_model') || 'gpt-3.5-turbo';
+              const hostUrl = localStorage.getItem('ai_host_url') || 'http://localhost:11434';
+              const model = localStorage.getItem('ai_model') || 'llama3';
 
-              if (!apiKey) {
-                alert('Bitte konfiguriere zuerst deinen OpenAI API Key in den AI Einstellungen.');
+              if (!hostUrl) {
+                alert('Bitte konfiguriere zuerst deine Ollama Host URL in den AI Einstellungen.');
                 return;
               }
 
@@ -65,7 +65,7 @@ function RecipeCard({ recipe, onVote }) {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({
-                    apiKey,
+                    hostUrl,
                     model,
                     systemPrompt: 'Du bist ein Experte für Eisrezepte. Deine Aufgabe ist es, anhand eines Rezepts und der dazugehörigen Nutzerkommentare eine kurze, konkrete Verbesserung oder Abwandlung vorzuschlagen.',
                     userPrompt: `Rezept Titel: ${recipe.title}\nZutaten: ${recipe.ingredients}\nZubereitung: ${recipe.instructions}\n\nNutzerkommentare:\n${commentsList || 'Keine Kommentare vorhanden.'}\n\nSchlage eine Verbesserung vor:`

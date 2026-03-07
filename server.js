@@ -125,21 +125,20 @@ app.post('/api/recipes/:id/comments', (req, res) => {
 
 // 7. AI Chat Proxy
 app.post('/api/ai/chat', async (req, res) => {
-    const { apiKey, model, systemPrompt, userPrompt } = req.body;
+    const { hostUrl, model, systemPrompt, userPrompt } = req.body;
 
-    if (!apiKey || !model || !userPrompt) {
-        res.status(400).json({ error: 'Bitte API Key, Modell und User Prompt angeben.' });
+    if (!hostUrl || !model || !userPrompt) {
+        res.status(400).json({ error: 'Bitte Host URL, Modell und User Prompt angeben.' });
         return;
     }
 
     try {
         const fetch = (await import('node-fetch')).default;
 
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        const response = await fetch(`${hostUrl.replace(/\/$/, '')}/api/chat`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${apiKey}`
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({
                 model: model,
@@ -147,18 +146,18 @@ app.post('/api/ai/chat', async (req, res) => {
                     { role: 'system', content: systemPrompt || 'Du bist ein hilfreicher Assistent.' },
                     { role: 'user', content: userPrompt }
                 ],
-                temperature: 0.7
+                stream: false
             })
         });
 
         const data = await response.json();
 
         if (!response.ok) {
-            res.status(response.status).json({ error: data.error?.message || 'Fehler bei der AI-Anfrage.' });
+            res.status(response.status).json({ error: data.error || 'Fehler bei der AI-Anfrage.' });
             return;
         }
 
-        res.json({ result: data.choices[0].message.content });
+        res.json({ result: data.message.content });
     } catch (error) {
         console.error('Fehler beim AI Call:', error);
         res.status(500).json({ error: 'Interner Serverfehler bei der AI-Anfrage.' });

@@ -1,24 +1,24 @@
 import { useState, useEffect } from 'react';
 
 function AiSettings() {
-  const [apiKey, setApiKey] = useState('');
-  const [model, setModel] = useState('gpt-3.5-turbo');
+  const [hostUrl, setHostUrl] = useState('http://localhost:11434');
+  const [model, setModel] = useState('llama3');
   const [systemPrompt, setSystemPrompt] = useState('Du bist ein professioneller Eismacher und Experte für kreative Eisrezepte.');
   const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
-    const storedApiKey = localStorage.getItem('ai_api_key');
+    const storedHostUrl = localStorage.getItem('ai_host_url');
     const storedModel = localStorage.getItem('ai_model');
     const storedSystemPrompt = localStorage.getItem('ai_system_prompt');
 
-    if (storedApiKey) setApiKey(storedApiKey);
+    if (storedHostUrl) setHostUrl(storedHostUrl);
     if (storedModel) setModel(storedModel);
     if (storedSystemPrompt) setSystemPrompt(storedSystemPrompt);
   }, []);
 
   const handleSave = (e) => {
     e.preventDefault();
-    localStorage.setItem('ai_api_key', apiKey);
+    localStorage.setItem('ai_host_url', hostUrl);
     localStorage.setItem('ai_model', model);
     localStorage.setItem('ai_system_prompt', systemPrompt);
     alert('AI-Einstellungen gespeichert!');
@@ -37,29 +37,26 @@ function AiSettings() {
       {isExpanded && (
         <form onSubmit={handleSave} className="recipe-form">
           <div className="form-group">
-            <label htmlFor="apiKey">OpenAI API Key</label>
+            <label htmlFor="hostUrl">Ollama Host URL</label>
             <input
-              type="password"
-              id="apiKey"
+              type="url"
+              id="hostUrl"
               className="form-control"
-              placeholder="sk-..."
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
+              placeholder="http://localhost:11434"
+              value={hostUrl}
+              onChange={(e) => setHostUrl(e.target.value)}
             />
           </div>
           <div className="form-group">
             <label htmlFor="model">Model</label>
-            <select
+            <input
+              type="text"
               id="model"
               className="form-control"
+              placeholder="z.B. llama3, mistral, gemma"
               value={model}
               onChange={(e) => setModel(e.target.value)}
-            >
-              <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
-              <option value="gpt-4">gpt-4</option>
-              <option value="gpt-4-turbo">gpt-4-turbo</option>
-              <option value="gpt-4o">gpt-4o</option>
-            </select>
+            />
           </div>
           <div className="form-group">
             <label htmlFor="systemPrompt">System Prompt</label>
