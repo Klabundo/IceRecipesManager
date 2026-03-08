@@ -123,73 +123,138 @@ app.post('/api/recipes/:id/comments', (req, res) => {
     });
 });
 
-// 7. AI Models Proxy
-app.post('/api/ai/models', async (req, res) => {
-    const { hostUrl } = req.body;
 
-    if (!hostUrl) {
-        res.status(400).json({ error: 'Bitte Host URL angeben.' });
-        return;
-    }
-
-    try {
-        const fetch = (await import('node-fetch')).default;
-
-        const response = await fetch(`${hostUrl.replace(/\/$/, '')}/api/tags`);
-        const data = await response.json();
-
-        if (!response.ok) {
-            res.status(response.status).json({ error: data.error || 'Fehler beim Abrufen der Modelle.' });
+// --- Settings ---
+app.get('/api/settings', (req, res) => {
+    db.all('SELECT * FROM settings', [], (err, rows) => {
+        if (err) {
+            res.status(500).json({ error: err.message });
             return;
         }
+        const settings = {};
+        rows.forEach(row => { settings[row.key] = row.value; });
+        res.json(settings);
+    });
+});
 
-        const models = data.models ? data.models.map(m => m.name) : [];
-        res.json({ models });
-    } catch (error) {
-        console.error('Fehler beim AI Models Call:', error);
-        res.status(500).json({ error: 'Interner Serverfehler beim Abrufen der Modelle.' });
+app.put('/api/settings', (req, res) => {
+    const settings = req.body;
+    db.serialize(() => {
+        db.run('BEGIN TRANSACTION');
+        const stmt = db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)');
+        for (const [key, value] of Object.entries(settings)) {
+            stmt.run([key, value]);
+        }
+        stmt.finalize();
+        db.run('COMMIT', (err) => {
+            if (err) {
+                res.status(500).json({ error: err.message });
+            } else {
+                res.json({ message: 'Settings updated successfully' });
+            }
+        });
+    });
+});
+
+
+// 7. AI Models Proxy
+app.post('/api/ai/models', (req, res) => {
+    const providedHostUrl = req.body.hostUrl;
+
+    const fetchModels = async (hostUrl) => {
+        if (!hostUrl) {
+            res.status(400).json({ error: 'Bitte Host URL angeben.' });
+            return;
+        }
+        try {
+            const fetch = (await import('node-fetch')).default;
+            const response = await fetch(`${hostUrl.replace(/\/$/, '')}/api/tags`);
+            const data = await response.json();
+
+            if (!response.ok) {
+                res.status(response.status).json({ error: data.error || 'Fehler beim Abrufen der Modelle.' });
+                return;
+            }
+
+            const models = data.models ? data.models.map(m => m.name) : [];
+            res.json({ models });
+        } catch (error) {
+            console.error('Fehler beim AI Models Call:', error);
+            res.status(500).json({ error: 'Interner Serverfehler beim Abrufen der Modelle.' });
+        }
+    };
+
+    if (providedHostUrl) {
+        fetchModels(providedHostUrl);
+    } else {
+        db.get('SELECT value FROM settings WHERE key = ?', ['ai_host_url'], (err, row) => {
+            if (err) {
+                res.status(500).json({ error: err.message });
+                return;
+            }
+            fetchModels(row ? row.value : null);
+        });
     }
 });
 
-// 8. AI Chat Proxy
-app.post('/api/ai/chat', async (req, res) => {
-    const { hostUrl, model, systemPrompt, userPrompt } = req.body;
 
-    if (!hostUrl || !model || !userPrompt) {
-        res.status(400).json({ error: 'Bitte Host URL, Modell und User Prompt angeben.' });
+// 8. AI Chat Proxy
+app.post('/api/ai/chat', (req, res) => {
+    const { userPrompt } = req.body;
+
+    if (!userPrompt) {
+        res.status(400).json({ error: 'Bitte User Prompt angeben.' });
         return;
     }
 
-    try {
-        const fetch = (await import('node-fetch')).default;
+    db.all('SELECT * FROM settings', [], async (err, rows) => {
+        if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
+        const settings = {};
+        rows.forEach(row => { settings[row.key] = row.value; });
 
-        const response = await fetch(`${hostUrl.replace(/\/$/, '')}/api/chat`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                model: model,
-                messages: [
-                    { role: 'system', content: systemPrompt || 'Du bist ein hilfreicher Assistent.' },
-                    { role: 'user', content: userPrompt }
-                ],
-                stream: false
-            })
-        });
+        const hostUrl = settings['ai_host_url'];
+        const model = settings['ai_model'];
+        const systemPrompt = settings['ai_system_prompt'];
 
-        const data = await response.json();
-
-        if (!response.ok) {
-            res.status(response.status).json({ error: data.error || 'Fehler bei der AI-Anfrage.' });
+        if (!hostUrl || !model) {
+            res.status(400).json({ error: 'Bitte Host URL und Modell in den Einstellungen festlegen.' });
             return;
         }
 
-        res.json({ result: data.message.content });
-    } catch (error) {
-        console.error('Fehler beim AI Call:', error);
-        res.status(500).json({ error: 'Interner Serverfehler bei der AI-Anfrage.' });
-    }
+        try {
+            const fetch = (await import('node-fetch')).default;
+
+            const response = await fetch(`${hostUrl.replace(/\/$/, '')}/api/chat`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    model: model,
+                    messages: [
+                        { role: 'system', content: systemPrompt || 'Du bist ein hilfreicher Assistent.' },
+                        { role: 'user', content: userPrompt }
+                    ],
+                    stream: false
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                res.status(response.status).json({ error: data.error || 'Fehler bei der AI-Anfrage.' });
+                return;
+            }
+
+            res.json({ result: data.message.content });
+        } catch (error) {
+            console.error('Fehler beim AI Call:', error);
+            res.status(500).json({ error: 'Interner Serverfehler bei der AI-Anfrage.' });
+        }
+    });
 });
 
 // Start Server
