@@ -123,7 +123,35 @@ app.post('/api/recipes/:id/comments', (req, res) => {
     });
 });
 
-// 7. AI Chat Proxy
+// 7. AI Models Proxy
+app.post('/api/ai/models', async (req, res) => {
+    const { hostUrl } = req.body;
+
+    if (!hostUrl) {
+        res.status(400).json({ error: 'Bitte Host URL angeben.' });
+        return;
+    }
+
+    try {
+        const fetch = (await import('node-fetch')).default;
+
+        const response = await fetch(`${hostUrl.replace(/\/$/, '')}/api/tags`);
+        const data = await response.json();
+
+        if (!response.ok) {
+            res.status(response.status).json({ error: data.error || 'Fehler beim Abrufen der Modelle.' });
+            return;
+        }
+
+        const models = data.models ? data.models.map(m => m.name) : [];
+        res.json({ models });
+    } catch (error) {
+        console.error('Fehler beim AI Models Call:', error);
+        res.status(500).json({ error: 'Interner Serverfehler beim Abrufen der Modelle.' });
+    }
+});
+
+// 8. AI Chat Proxy
 app.post('/api/ai/chat', async (req, res) => {
     const { hostUrl, model, systemPrompt, userPrompt } = req.body;
 
