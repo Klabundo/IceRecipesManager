@@ -8,15 +8,19 @@ function AiSettings() {
   const [availableModels, setAvailableModels] = useState([]);
   const [isLoadingModels, setIsLoadingModels] = useState(false);
 
-  useEffect(() => {
-    const storedHostUrl = localStorage.getItem('ai_host_url');
-    const storedModel = localStorage.getItem('ai_model');
-    const storedSystemPrompt = localStorage.getItem('ai_system_prompt');
 
-    if (storedHostUrl) setHostUrl(storedHostUrl);
-    if (storedModel) setModel(storedModel);
-    if (storedSystemPrompt) setSystemPrompt(storedSystemPrompt);
+  useEffect(() => {
+    // Fetch settings from server
+    fetch('/api/settings')
+      .then(res => res.json())
+      .then(data => {
+        if (data.ai_host_url) setHostUrl(data.ai_host_url);
+        if (data.ai_model) setModel(data.ai_model);
+        if (data.ai_system_prompt) setSystemPrompt(data.ai_system_prompt);
+      })
+      .catch(err => console.error('Fehler beim Laden der Einstellungen:', err));
   }, []);
+
 
   const fetchModels = async (url) => {
     setIsLoadingModels(true);
@@ -55,14 +59,31 @@ function AiSettings() {
     fetchModels(hostUrl);
   };
 
-  const handleSave = (e) => {
+
+  const handleSave = async (e) => {
     e.preventDefault();
-    localStorage.setItem('ai_host_url', hostUrl);
-    localStorage.setItem('ai_model', model);
-    localStorage.setItem('ai_system_prompt', systemPrompt);
-    alert('AI-Einstellungen gespeichert!');
-    setIsOpen(false);
+    try {
+      const response = await fetch('/api/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ai_host_url: hostUrl,
+          ai_model: model,
+          ai_system_prompt: systemPrompt
+        })
+      });
+      if (response.ok) {
+        alert('AI-Einstellungen gespeichert!');
+        setIsOpen(false);
+      } else {
+        alert('Fehler beim Speichern der Einstellungen.');
+      }
+    } catch (error) {
+      console.error('Fehler beim Speichern:', error);
+      alert('Netzwerkfehler beim Speichern der Einstellungen.');
+    }
   };
+
 
   return (
     <>
@@ -99,26 +120,29 @@ function AiSettings() {
 
                 <div className="form-group">
                   <label htmlFor="model">Model {isLoadingModels && '⏳'}</label>
-                  {availableModels.length > 0 ? (
-                    <select
-                      id="model"
-                      className="form-control"
-                      value={model}
-                      onChange={(e) => setModel(e.target.value)}
-                    >
-                      {availableModels.map((m) => (
-                        <option key={m} value={m}>{m}</option>
-                      ))}
-                    </select>
-                  ) : (
-                    <input
-                      type="text"
-                      id="model"
-                      className="form-control"
-                      placeholder="z.B. llama3, mistral, gemma"
-                      value={model}
-                      onChange={(e) => setModel(e.target.value)}
-                    />
+                  <input
+                    type="text"
+                    id="model"
+                    list="model-list"
+                    className="form-control"
+                    placeholder="z.B. llama3, mistral, gemma"
+                    value={model}
+                    onChange={(e) => setModel(e.target.value)}
+                  />
+                  <datalist id="model-list">
+                    {availableModels.map((m) => (
+                      <option key={m} value={m} />
+                    ))}
+                  </datalist>
+                  {availableModels.length > 0 && (
+                    <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: '#666' }}>
+                      <strong>Verfügbare Modelle:</strong>
+                      <ul style={{ paddingLeft: '1.2rem', marginTop: '0.2rem' }}>
+                        {availableModels.map((m) => (
+                          <li key={m}>{m}</li>
+                        ))}
+                      </ul>
+                    </div>
                   )}
                 </div>
 

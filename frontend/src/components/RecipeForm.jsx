@@ -8,15 +8,6 @@ function RecipeForm({ onRecipeAdded }) {
   const [isGenerating, setIsGenerating] = useState(false);
 
   const handleGenerateRecipe = async () => {
-    const hostUrl = localStorage.getItem('ai_host_url') || 'http://localhost:11434';
-    const model = localStorage.getItem('ai_model') || 'llama3';
-    const systemPrompt = localStorage.getItem('ai_system_prompt') || 'Du bist ein professioneller Eismacher und Experte für kreative Eisrezepte.';
-
-    if (!hostUrl) {
-      alert('Bitte konfiguriere zuerst deine Ollama Host URL in den AI Einstellungen.');
-      return;
-    }
-
     if (!title) {
       alert('Bitte gib zumindest einen Titel oder eine Rezeptidee im Feld "Eis-Titel" ein, damit die KI weiß, was sie generieren soll.');
       return;
@@ -29,9 +20,6 @@ function RecipeForm({ onRecipeAdded }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          hostUrl,
-          model,
-          systemPrompt,
           userPrompt: `Generiere ein Eisrezept für die Idee "${title}". Antworte IMMER nur in folgendem JSON-Format: {"title": "Der Name des Eises", "ingredients": "Liste der Zutaten mit Mengen", "instructions": "Schritt-für-Schritt Anleitung"}`
         })
       });

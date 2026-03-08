@@ -46,6 +46,26 @@ const db = new sqlite3.Database(dbPath, (err) => {
                 console.log('Tabelle "comments" ist bereit.');
             }
         });
+
+        // Settings Tabelle erstellen
+        db.run(`CREATE TABLE IF NOT EXISTS settings (
+            key TEXT PRIMARY KEY,
+            value TEXT
+        )`, (err) => {
+            if (err) {
+                console.error('Fehler beim Erstellen der Settings-Tabelle', err.message);
+            } else {
+                console.log('Tabelle "settings" ist bereit.');
+                const defaults = [
+                    ['ai_host_url', 'http://localhost:11434'],
+                    ['ai_model', 'llama3'],
+                    ['ai_system_prompt', 'Du bist ein professioneller Eismacher und Experte für kreative Eisrezepte.']
+                ];
+                defaults.forEach(([key, value]) => {
+                    db.run(`INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)`, [key, value]);
+                });
+            }
+        });
     }
 });
 
