@@ -48,7 +48,7 @@ function AiSettings() {
     if (isOpen) {
       fetchModels(hostUrl);
     }
-  }, [isOpen]);
+  }, [isOpen, hostUrl]);
 
   const handleHostUrlChange = (e) => {
     const newUrl = e.target.value;
@@ -120,30 +120,19 @@ function AiSettings() {
 
                 <div className="form-group">
                   <label htmlFor="model">Model {isLoadingModels && '⏳'}</label>
-                  <input
-                    type="text"
+                  <select
                     id="model"
-                    list="model-list"
                     className="form-control"
-                    placeholder="z.B. llama3, mistral, gemma"
                     value={model}
                     onChange={(e) => setModel(e.target.value)}
-                  />
-                  <datalist id="model-list">
+                  >
+                    {!availableModels.includes(model) && (
+                      <option value={model}>{model}</option>
+                    )}
                     {availableModels.map((m) => (
-                      <option key={m} value={m} />
+                      <option key={m} value={m}>{m}</option>
                     ))}
-                  </datalist>
-                  {availableModels.length > 0 && (
-                    <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: '#666' }}>
-                      <strong>Verfügbare Modelle:</strong>
-                      <ul style={{ paddingLeft: '1.2rem', marginTop: '0.2rem' }}>
-                        {availableModels.map((m) => (
-                          <li key={m}>{m}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
+                  </select>
                 </div>
 
                 <div className="form-group">
