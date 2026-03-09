@@ -18,6 +18,18 @@
   --radius-lg: 24px;
 }
 
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-color: #121212;
+    --card-bg: #1E1E1E;
+    --text-main: #FFFFFF;
+    --text-muted: #B3B3B3;
+    --border-light: #2D2D2D;
+    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.6);
+  }
+}
+
 body {
   margin: 0;
   font-family: 'Plus Jakarta Sans', sans-serif;
@@ -129,7 +141,7 @@ body {
 .form-control:focus,
 .search-input:focus {
   outline: none;
-  background-color: white;
+  background-color: var(--card-bg);
   border-color: var(--primary-color);
   box-shadow: 0 4px 15px rgba(255, 94, 142, 0.1);
 }

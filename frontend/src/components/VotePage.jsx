@@ -23,13 +23,31 @@ function VotePage() {
     fetchRecipe();
   }, [id]);
 
+  const sessionKey = `voted_${id}`;
+  const [currentVote, setCurrentVote] = useState(() => sessionStorage.getItem(sessionKey));
+
   const handleVote = async (type) => {
     try {
-      const response = await fetch(`/api/recipes/${id}/${type}`, { method: 'POST' });
-      if (response.ok) {
-        navigate(`/comment/${id}`);
+      if (currentVote === type) {
+          // Unvote
+          await fetch(`/api/recipes/${id}/remove_${type}`, { method: 'POST' });
+          sessionStorage.removeItem(sessionKey);
+          setCurrentVote(null);
+          // Don't navigate, let them vote again
       } else {
-        alert('Fehler beim Voten.');
+          // If they voted something else before, remove it
+          if (currentVote) {
+             await fetch(`/api/recipes/${id}/remove_${currentVote}`, { method: 'POST' });
+          }
+
+          const response = await fetch(`/api/recipes/${id}/${type}`, { method: 'POST' });
+          if (response.ok) {
+            sessionStorage.setItem(sessionKey, type);
+            setCurrentVote(type);
+            navigate(`/comment/${id}`);
+          } else {
+            alert('Fehler beim Voten.');
+          }
       }
     } catch (error) {
       console.error('Fehler beim Voten:', error);
@@ -44,38 +62,46 @@ function VotePage() {
       <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>{recipe.title}</h2>
       <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>Wie hat dir dieses Eis geschmeckt?</p>
 
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', maxWidth: '400px', margin: '0 auto' }}>
         <button
           onClick={() => handleVote('upvote')}
+          className={`btn ${currentVote === 'upvote' ? 'active' : ''}`}
           style={{
-            fontSize: '4rem',
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            padding: '1rem',
-            borderRadius: '50%',
-            transition: 'transform 0.2s'
+            fontSize: '1.5rem',
+            padding: '1.5rem',
+            borderRadius: '16px',
+            backgroundColor: currentVote === 'upvote' ? 'var(--upvote-color)' : 'var(--bg-color)',
+            color: currentVote === 'upvote' ? 'white' : 'var(--text-main)',
+            border: currentVote === 'upvote' ? '2px solid var(--upvote-color)' : '2px solid var(--border-light)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '1rem',
+            boxShadow: 'var(--shadow-sm)'
           }}
-          onMouseOver={e => e.currentTarget.style.transform = 'scale(1.1)'}
-          onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
         >
-          😍
+          <span style={{ fontSize: '2.5rem' }}>😍</span>
+          <span>Lecker!</span>
         </button>
         <button
           onClick={() => handleVote('downvote')}
+          className={`btn ${currentVote === 'downvote' ? 'active' : ''}`}
           style={{
-            fontSize: '4rem',
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            padding: '1rem',
-            borderRadius: '50%',
-            transition: 'transform 0.2s'
+            fontSize: '1.5rem',
+            padding: '1.5rem',
+            borderRadius: '16px',
+            backgroundColor: currentVote === 'downvote' ? 'var(--downvote-color)' : 'var(--bg-color)',
+            color: currentVote === 'downvote' ? 'white' : 'var(--text-main)',
+            border: currentVote === 'downvote' ? '2px solid var(--downvote-color)' : '2px solid var(--border-light)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '1rem',
+            boxShadow: 'var(--shadow-sm)'
           }}
-          onMouseOver={e => e.currentTarget.style.transform = 'scale(1.1)'}
-          onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
         >
-          🤢
+          <span style={{ fontSize: '2.5rem' }}>🤢</span>
+          <span>Nicht meins</span>
         </button>
       </div>
     </div>
