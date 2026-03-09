@@ -1,5 +1,6 @@
 const express = require('express');
 const db = require('./database');
+const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -255,6 +256,11 @@ app.post('/api/ai/chat', (req, res) => {
             res.status(500).json({ error: 'Interner Serverfehler bei der AI-Anfrage.' });
         }
     });
+});
+
+// 9. Catch-all for React Router
+app.use((req, res) => {
+    res.sendFile(path.join(__dirname, 'frontend/dist', 'index.html'));
 });
 
 // Start Server
