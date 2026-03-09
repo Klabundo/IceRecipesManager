@@ -1,3 +1,4 @@
+import toast from "react-hot-toast";
 import { useState, useEffect } from 'react';
 
 function Comments({ recipeId }) {
@@ -36,7 +37,7 @@ function Comments({ recipeId }) {
         fetchComments();
       } else {
         const err = await response.json();
-        alert('Fehler: ' + err.error);
+        toast.error('Fehler: ' + err.error);
       }
     } catch (error) {
       console.error('Fehler beim Senden des Kommentars:', error);

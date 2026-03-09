@@ -1,3 +1,4 @@
+import toast from "react-hot-toast";
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
@@ -46,7 +47,7 @@ function VotePage() {
             setCurrentVote(type);
             navigate(`/comment/${id}`);
           } else {
-            alert('Fehler beim Voten.');
+            toast.error('Fehler beim Voten.');
           }
       }
     } catch (error) {

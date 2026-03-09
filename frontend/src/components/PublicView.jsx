@@ -1,3 +1,4 @@
+import toast from "react-hot-toast";
 import { useState, useEffect } from 'react';
 import RecipeList from './RecipeList';
 
@@ -32,7 +33,7 @@ function PublicView() {
       if (type) {
         const response = await fetch(`/api/recipes/${id}/${type}`, { method: 'POST' });
         if (!response.ok) {
-           alert('Fehler beim Voten.');
+           toast.error('Fehler beim Voten.');
            return;
         }
       }

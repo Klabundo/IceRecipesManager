@@ -1,3 +1,4 @@
+import toast from "react-hot-toast";
 import { useState, useEffect } from 'react';
 import RecipeForm from './RecipeForm';
 import RecipeList from './RecipeList';
@@ -35,7 +36,7 @@ function ManagerView() {
       if (type) {
         const response = await fetch(`/api/recipes/${id}/${type}`, { method: 'POST' });
         if (!response.ok) {
-           alert('Fehler beim Voten.');
+           toast.error('Fehler beim Voten.');
            return;
         }
       }
@@ -136,7 +137,7 @@ function ManagerView() {
                 if (res.ok) {
                   fetchRecipes();
                 } else {
-                  alert('Fehler beim Löschen');
+                  toast.error('Fehler beim Löschen');
                 }
               } catch (e) {
                 console.error(e);

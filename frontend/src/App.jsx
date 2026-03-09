@@ -1,4 +1,5 @@
 import { Routes, Route } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import PublicView from './components/PublicView';
 import ManagerView from './components/ManagerView';
 import VotePage from './components/VotePage';
@@ -8,6 +9,7 @@ import './index.css';
 function App() {
   return (
     <div className="app-container">
+      <Toaster position="bottom-center" toastOptions={{ style: { background: 'var(--card-bg)', color: 'var(--text-main)', border: '1px solid var(--border-light)' } }} />
       <header className="app-header">
         <h1>✨ Eis-Rezepte</h1>
         <p>Die süßeste Sammlung der Welt</p>
