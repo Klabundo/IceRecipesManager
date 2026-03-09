@@ -85,7 +85,6 @@ function RecipeForm({ onRecipeAdded, initialData, onCancelEdit }) {
         setIngredients('');
         setInstructions('');
         onRecipeAdded();
-        alert(initialData ? 'Rezept erfolgreich aktualisiert!' : 'Rezept erfolgreich hinzugefügt!');
       } else {
         const err = await response.json();
         alert('Fehler: ' + err.error);

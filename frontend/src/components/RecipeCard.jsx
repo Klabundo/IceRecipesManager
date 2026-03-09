@@ -75,14 +75,6 @@ function RecipeCard({ recipe, onVote, isManager, onEdit, onDelete }) {
         <div className="recipe-meta">
           Teilte das Rezept am: {new Date(recipe.created_at).toLocaleString('de-DE', { dateStyle: 'long', timeStyle: 'short' })}
         </div>
-
-        {isManager && (
-          <div className="recipe-manager-actions" style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}>
-            <button className="btn" onClick={(e) => { e.stopPropagation(); onEdit(); }} style={{ flex: 1, backgroundColor: '#4CAF50', color: 'white' }}>✏️ Bearbeiten</button>
-            <button className="btn" onClick={(e) => { e.stopPropagation(); onDelete(); }} style={{ flex: 1, backgroundColor: '#f44336', color: 'white' }}>🗑️ Löschen</button>
-            <button className="btn" onClick={(e) => { e.stopPropagation(); setShowQR(!showQR); }} style={{ flex: 1, backgroundColor: '#2196F3', color: 'white' }}>📷 QR</button>
-          </div>
-        )}
       </div>
 
       {showQR && isManager && (
@@ -125,6 +117,14 @@ function RecipeCard({ recipe, onVote, isManager, onEdit, onDelete }) {
 
               <h4>👩‍🍳 So wird's gemacht</h4>
               <p>{recipe.instructions}</p>
+
+              {isManager && (
+                <div className="recipe-manager-actions" style={{ marginTop: '2rem', display: 'flex', gap: '0.5rem', borderTop: '1px solid var(--border-light)', paddingTop: '1.5rem' }}>
+                  <button className="btn" onClick={(e) => { e.stopPropagation(); setIsExpanded(false); onEdit(recipe); }} style={{ flex: 1, backgroundColor: '#4CAF50', color: 'white' }}>✏️ Bearbeiten</button>
+                  <button className="btn" onClick={(e) => { e.stopPropagation(); setIsExpanded(false); onDelete(recipe.id); }} style={{ flex: 1, backgroundColor: '#f44336', color: 'white' }}>🗑️ Löschen</button>
+                  <button className="btn" onClick={(e) => { e.stopPropagation(); setShowQR(!showQR); }} style={{ flex: 1, backgroundColor: '#2196F3', color: 'white' }}>📷 QR Code</button>
+                </div>
+              )}
 
               <button
                 className="btn"
