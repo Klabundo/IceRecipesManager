@@ -31,8 +31,22 @@ function RecipeCard({ recipe, onVote, isManager, onEdit, onDelete }) {
     }
   };
 
+  const getIngredientsText = () => {
+    try {
+      const parsed = JSON.parse(recipe.ingredients);
+      if (Array.isArray(parsed)) {
+        return parsed.map(ing => `${ing.amount ? ing.amount + ' ' : ''}${ing.name}`).join('\n');
+      }
+    } catch {
+      // Fallback
+    }
+    return recipe.ingredients;
+  };
+
   const handleCopyRecipe = async () => {
-    const textToCopy = `🍨 ${recipe.title} 🍨\n\n🛒 Einkaufszettel:\n${recipe.ingredients}\n\n👩‍🍳 So wird's gemacht:\n${recipe.instructions}`;
+    const ingredientsText = getIngredientsText();
+    const instructionsText = instructionSteps.map((step, idx) => `${idx + 1}. ${step}`).join('\n');
+    const textToCopy = `🍨 ${recipe.title} 🍨\n\n🛒 Einkaufszettel:\n${ingredientsText}\n\n👩‍🍳 So wird's gemacht:\n${instructionsText}`;
     try {
       await navigator.clipboard.writeText(textToCopy);
       toast.success('Rezept in die Zwischenablage kopiert! 📋');
@@ -42,10 +56,43 @@ function RecipeCard({ recipe, onVote, isManager, onEdit, onDelete }) {
     }
   };
 
-  const instructionSteps = (recipe.instructions || '')
-    .split('\n')
-    .map((step) => step.trim())
-    .filter((step) => step.length > 0);
+  const getInstructionSteps = () => {
+    try {
+      const parsed = JSON.parse(recipe.instructions);
+      if (Array.isArray(parsed)) {
+        return parsed.map(inst => inst.step).filter(step => step && step !== '[object Object]');
+      }
+    } catch {
+      // Fallback
+    }
+    return (recipe.instructions || '')
+      .split('\n')
+      .map((step) => step.trim())
+      .filter((step) => step.length > 0 && step !== '[object Object]');
+  };
+
+  const instructionSteps = getInstructionSteps();
+
+  const renderIngredients = () => {
+    try {
+      const parsed = JSON.parse(recipe.ingredients);
+      if (Array.isArray(parsed)) {
+        return (
+          <ul style={{ listStyleType: 'none', padding: 0, margin: 0 }}>
+            {parsed.map((ing, idx) => (
+              <li key={idx} style={{ padding: '0.5rem 0', borderBottom: '1px solid var(--border-light)', display: 'flex', gap: '1rem' }}>
+                {ing.amount && <span style={{ fontWeight: 'bold', minWidth: '80px' }}>{ing.amount}</span>}
+                <span>{ing.name}</span>
+              </li>
+            ))}
+          </ul>
+        );
+      }
+    } catch {
+      // Fallback
+    }
+    return <p>{recipe.ingredients}</p>;
+  };
 
   const closeExpanded = () => {
     setIsExpanded(false);
@@ -129,7 +176,9 @@ function RecipeCard({ recipe, onVote, isManager, onEdit, onDelete }) {
               {viewMode === 'overview' ? (
                 <>
                   <h4>🛒 Einkaufszettel</h4>
-                  <p>{recipe.ingredients}</p>
+                  <div style={{ background: 'var(--bg-color)', padding: '1.25rem', borderRadius: 'var(--radius-sm)' }}>
+                    {renderIngredients()}
+                  </div>
 
                   {instructionSteps.length > 0 && (
                     <button
@@ -177,7 +226,7 @@ function RecipeCard({ recipe, onVote, isManager, onEdit, onDelete }) {
                             model,
                             systemPrompt:
                               'Du bist ein Experte für Eisrezepte. Deine Aufgabe ist es, anhand eines Rezepts und der dazugehörigen Nutzerkommentare eine kurze, konkrete Verbesserung oder Abwandlung vorzuschlagen.',
-                            userPrompt: `Rezept Titel: ${recipe.title}\nZutaten: ${recipe.ingredients}\nZubereitung: ${recipe.instructions}\n\nNutzerkommentare:\n${
+                            userPrompt: `Rezept Titel: ${recipe.title}\nZutaten: ${getIngredientsText()}\nZubereitung: ${instructionSteps.join('\n')}\n\nNutzerkommentare:\n${
                               commentsList || 'Keine Kommentare vorhanden.'
                             }\n\nSchlage eine Verbesserung vor:`,
                           }),
