@@ -1,3 +1,4 @@
+import toast from "react-hot-toast";
 import { useState, useEffect } from 'react';
 
 function AiSettings() {
@@ -68,14 +69,14 @@ function AiSettings() {
         })
       });
       if (response.ok) {
-        alert('AI-Einstellungen gespeichert!');
+        toast.success('AI-Einstellungen gespeichert!');
         setIsOpen(false);
       } else {
-        alert('Fehler beim Speichern der Einstellungen.');
+        toast.error('Fehler beim Speichern der Einstellungen.');
       }
     } catch (error) {
       console.error('Fehler beim Speichern:', error);
-      alert('Netzwerkfehler beim Speichern der Einstellungen.');
+      toast.error('Netzwerkfehler beim Speichern der Einstellungen.');
     }
   };
 

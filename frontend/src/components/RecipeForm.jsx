@@ -1,3 +1,4 @@
+import toast from "react-hot-toast";
 import { useState, useEffect } from 'react';
 
 function RecipeForm({ onRecipeAdded, initialData, onCancelEdit }) {
@@ -21,7 +22,7 @@ function RecipeForm({ onRecipeAdded, initialData, onCancelEdit }) {
 
   const handleGenerateRecipe = async () => {
     if (!title) {
-      alert('Bitte gib zumindest einen Titel oder eine Rezeptidee im Feld "Eis-Titel" ein, damit die KI weiß, was sie generieren soll.');
+      toast.error('Bitte gib zumindest einen Titel oder eine Rezeptidee im Feld "Eis-Titel" ein, damit die KI weiß, was sie generieren soll.');
       return;
     }
 
@@ -55,12 +56,12 @@ function RecipeForm({ onRecipeAdded, initialData, onCancelEdit }) {
         if (recipeData.instructions) setInstructions(recipeData.instructions);
       } catch {
         console.error('Konnte AI Antwort nicht als JSON parsen:', result.result);
-        alert('Die KI hat kein gültiges JSON zurückgegeben. Bitte versuche es noch einmal.');
+        toast.error('Die KI hat kein gültiges JSON zurückgegeben. Bitte versuche es noch einmal.');
       }
 
     } catch (error) {
       console.error('Fehler bei der Generierung:', error);
-      alert(error.message);
+      toast.error(error.message);
     } finally {
       setIsGenerating(false);
     }
@@ -81,18 +82,18 @@ function RecipeForm({ onRecipeAdded, initialData, onCancelEdit }) {
       });
 
       if (response.ok) {
+        toast.success(initialData ? 'Rezept erfolgreich aktualisiert! 🎉' : 'Rezept erfolgreich hinzugefügt! 🎉');
         setTitle('');
         setIngredients('');
         setInstructions('');
         onRecipeAdded();
-        alert(initialData ? 'Rezept erfolgreich aktualisiert!' : 'Rezept erfolgreich hinzugefügt!');
       } else {
         const err = await response.json();
-        alert('Fehler: ' + err.error);
+        toast.error('Fehler: ' + err.error);
       }
     } catch (error) {
       console.error('Fehler beim Speichern:', error);
-      alert('Netzwerkfehler beim Speichern des Rezepts.');
+      toast.error('Netzwerkfehler beim Speichern des Rezepts.');
     } finally {
       setIsSubmitting(false);
     }

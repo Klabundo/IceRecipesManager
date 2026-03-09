@@ -1,3 +1,4 @@
+import toast from "react-hot-toast";
 import { useState } from 'react';
 import Comments from './Comments';
 import { QRCodeSVG } from 'qrcode.react';
@@ -32,10 +33,10 @@ function RecipeCard({ recipe, onVote, isManager, onEdit, onDelete }) {
     const textToCopy = `🍨 ${recipe.title} 🍨\n\n🛒 Einkaufszettel:\n${recipe.ingredients}\n\n👩‍🍳 So wird's gemacht:\n${recipe.instructions}`;
     try {
       await navigator.clipboard.writeText(textToCopy);
-      alert('Rezept in die Zwischenablage kopiert! 📋');
+      toast.success('Rezept in die Zwischenablage kopiert! 📋');
     } catch (err) {
       console.error('Fehler beim Kopieren: ', err);
-      alert('Kopieren fehlgeschlagen.');
+      toast.error('Kopieren fehlgeschlagen.');
     }
   };
 
@@ -52,16 +53,6 @@ function RecipeCard({ recipe, onVote, isManager, onEdit, onDelete }) {
             {score > 0 ? '🔥' : score < 0 ? '🧊' : '⭐'} {score}
           </div>
         </div>
-
-        {isManager && (
-          <div className="recipe-body" style={{ marginTop: '1.5rem' }}>
-            <h4 style={{ marginTop: 0 }}>🛒 Einkaufszettel</h4>
-            <p>{recipe.ingredients}</p>
-
-            <h4>👩‍🍳 So wird's gemacht</h4>
-            <p>{recipe.instructions}</p>
-          </div>
-        )}
 
         <div className="recipe-actions">
           <button
@@ -85,14 +76,6 @@ function RecipeCard({ recipe, onVote, isManager, onEdit, onDelete }) {
         <div className="recipe-meta">
           Teilte das Rezept am: {new Date(recipe.created_at).toLocaleString('de-DE', { dateStyle: 'long', timeStyle: 'short' })}
         </div>
-
-        {isManager && (
-          <div className="recipe-manager-actions" style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}>
-            <button className="btn" onClick={(e) => { e.stopPropagation(); onEdit(); }} style={{ flex: 1, backgroundColor: '#4CAF50', color: 'white' }}>✏️ Bearbeiten</button>
-            <button className="btn" onClick={(e) => { e.stopPropagation(); onDelete(); }} style={{ flex: 1, backgroundColor: '#f44336', color: 'white' }}>🗑️ Löschen</button>
-            <button className="btn" onClick={(e) => { e.stopPropagation(); setShowQR(!showQR); }} style={{ flex: 1, backgroundColor: '#2196F3', color: 'white' }}>📷 QR</button>
-          </div>
-        )}
       </div>
 
       {showQR && isManager && (
@@ -136,6 +119,14 @@ function RecipeCard({ recipe, onVote, isManager, onEdit, onDelete }) {
               <h4>👩‍🍳 So wird's gemacht</h4>
               <p>{recipe.instructions}</p>
 
+              {isManager && (
+                <div className="recipe-manager-actions" style={{ marginTop: '2rem', display: 'flex', gap: '0.5rem', borderTop: '1px solid var(--border-light)', paddingTop: '1.5rem' }}>
+                  <button className="btn" onClick={(e) => { e.stopPropagation(); setIsExpanded(false); onEdit(recipe); }} style={{ flex: 1, backgroundColor: '#4CAF50', color: 'white' }}>✏️ Bearbeiten</button>
+                  <button className="btn" onClick={(e) => { e.stopPropagation(); setIsExpanded(false); onDelete(recipe.id); }} style={{ flex: 1, backgroundColor: '#f44336', color: 'white' }}>🗑️ Löschen</button>
+                  <button className="btn" onClick={(e) => { e.stopPropagation(); setIsExpanded(false); setShowQR(true); }} style={{ flex: 1, backgroundColor: '#2196F3', color: 'white' }}>📷 QR Code</button>
+                </div>
+              )}
+
               <button
                 className="btn"
                 onClick={async () => {
@@ -143,7 +134,7 @@ function RecipeCard({ recipe, onVote, isManager, onEdit, onDelete }) {
                   const model = localStorage.getItem('ai_model') || 'llama3';
 
                   if (!hostUrl) {
-                    alert('Bitte konfiguriere zuerst deine Ollama Host URL in den AI Einstellungen.');
+                    toast.error('Bitte konfiguriere zuerst deine Ollama Host URL in den AI Einstellungen.');
                     return;
                   }
 
@@ -175,7 +166,7 @@ function RecipeCard({ recipe, onVote, isManager, onEdit, onDelete }) {
                     setImprovementSuggestion(result.result);
                   } catch (error) {
                     console.error('Fehler bei AI Verbesserung:', error);
-                    alert('Konnte keinen Verbesserungsvorschlag generieren.');
+                    toast.error('Konnte keinen Verbesserungsvorschlag generieren.');
                   } finally {
                     setIsImproving(false);
                   }

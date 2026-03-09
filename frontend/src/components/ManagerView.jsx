@@ -1,3 +1,4 @@
+import toast from "react-hot-toast";
 import { useState, useEffect } from 'react';
 import RecipeForm from './RecipeForm';
 import RecipeList from './RecipeList';
@@ -35,7 +36,7 @@ function ManagerView() {
       if (type) {
         const response = await fetch(`/api/recipes/${id}/${type}`, { method: 'POST' });
         if (!response.ok) {
-           alert('Fehler beim Voten.');
+           toast.error('Fehler beim Voten.');
            return;
         }
       }
@@ -67,18 +68,34 @@ function ManagerView() {
       <AiSettings />
 
       <section className="card form-section">
-        <h2 className="section-title">
-          {editingRecipe ? '✏️ Rezept bearbeiten' : '🍦 Neues Rezept kreieren'}
-        </h2>
+        <h2 className="section-title">🍦 Neues Rezept kreieren</h2>
         <RecipeForm
           onRecipeAdded={() => {
             fetchRecipes();
-            setEditingRecipe(null);
           }}
-          initialData={editingRecipe}
-          onCancelEdit={() => setEditingRecipe(null)}
         />
       </section>
+
+      {editingRecipe && (
+        <div className="modal-overlay" onClick={() => setEditingRecipe(null)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>✏️ Rezept bearbeiten</h2>
+              <button className="modal-close" onClick={() => setEditingRecipe(null)}>✖</button>
+            </div>
+            <div className="modal-body">
+              <RecipeForm
+                onRecipeAdded={() => {
+                  fetchRecipes();
+                  setEditingRecipe(null);
+                }}
+                initialData={editingRecipe}
+                onCancelEdit={() => setEditingRecipe(null)}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       <section className="card search-section">
         <h2 className="section-title">🔍 Rezepte finden (Manager)</h2>
@@ -112,7 +129,6 @@ function ManagerView() {
           isManager={true}
           onEdit={(recipe) => {
             setEditingRecipe(recipe);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
           onDelete={async (id) => {
             if (window.confirm('Rezept wirklich löschen?')) {
@@ -121,7 +137,7 @@ function ManagerView() {
                 if (res.ok) {
                   fetchRecipes();
                 } else {
-                  alert('Fehler beim Löschen');
+                  toast.error('Fehler beim Löschen');
                 }
               } catch (e) {
                 console.error(e);

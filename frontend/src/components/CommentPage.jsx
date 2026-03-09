@@ -1,3 +1,4 @@
+import toast from "react-hot-toast";
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
@@ -23,11 +24,11 @@ function CommentPage() {
       });
 
       if (response.ok) {
-        alert('Danke für dein Feedback! 🎉');
+        toast.success('Danke für dein Feedback! 🎉');
         navigate('/');
       } else {
         const err = await response.json();
-        alert('Fehler: ' + err.error);
+        toast.error('Fehler: ' + err.error);
       }
     } catch (error) {
       console.error('Fehler beim Senden des Kommentars:', error);
@@ -37,7 +38,7 @@ function CommentPage() {
   };
 
   const handleSkip = () => {
-    alert('Danke für deine Abstimmung! 🎉');
+    toast.success('Danke für deine Abstimmung! 🎉');
     navigate('/');
   };
 
