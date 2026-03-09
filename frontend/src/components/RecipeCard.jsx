@@ -53,16 +53,6 @@ function RecipeCard({ recipe, onVote, isManager, onEdit, onDelete }) {
           </div>
         </div>
 
-        {isManager && (
-          <div className="recipe-body" style={{ marginTop: '1.5rem' }}>
-            <h4 style={{ marginTop: 0 }}>🛒 Einkaufszettel</h4>
-            <p>{recipe.ingredients}</p>
-
-            <h4>👩‍🍳 So wird's gemacht</h4>
-            <p>{recipe.instructions}</p>
-          </div>
-        )}
-
         <div className="recipe-actions">
           <button
             className={`btn btn-vote btn-up ${currentVote === 'upvote' ? 'active-vote' : ''}`}

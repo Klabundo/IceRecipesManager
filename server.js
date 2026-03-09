@@ -52,6 +52,56 @@ app.post('/api/recipes', (req, res) => {
     });
 });
 
+// 2a. Rezept bearbeiten
+app.put('/api/recipes/:id', (req, res) => {
+    const recipeId = req.params.id;
+    const { title, ingredients, instructions } = req.body;
+
+    if (!title || !ingredients || !instructions) {
+        res.status(400).json({ error: 'Bitte Titel, Zutaten und Zubereitung angeben.' });
+        return;
+    }
+
+    const query = `UPDATE recipes SET title = ?, ingredients = ?, instructions = ? WHERE id = ?`;
+    db.run(query, [title, ingredients, instructions, recipeId], function(err) {
+        if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
+        if (this.changes === 0) {
+            res.status(404).json({ error: 'Rezept nicht gefunden.' });
+            return;
+        }
+        res.json({ message: 'Rezept erfolgreich aktualisiert!' });
+    });
+});
+
+// 2b. Rezept löschen
+app.delete('/api/recipes/:id', (req, res) => {
+    const recipeId = req.params.id;
+
+    // Zuerst die Kommentare löschen (wegen Foreign Key constraints)
+    db.run(`DELETE FROM comments WHERE recipe_id = ?`, [recipeId], function(err) {
+        if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
+
+        // Dann das Rezept selbst löschen
+        db.run(`DELETE FROM recipes WHERE id = ?`, [recipeId], function(err) {
+            if (err) {
+                res.status(500).json({ error: err.message });
+                return;
+            }
+            if (this.changes === 0) {
+                res.status(404).json({ error: 'Rezept nicht gefunden.' });
+                return;
+            }
+            res.json({ message: 'Rezept erfolgreich gelöscht!' });
+        });
+    });
+});
+
 // 3. Rezept upvoten
 app.post('/api/recipes/:id/upvote', (req, res) => {
     const recipeId = req.params.id;
