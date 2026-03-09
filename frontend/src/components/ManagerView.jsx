@@ -24,14 +24,23 @@ function ManagerView() {
     fetchRecipes();
   }, []);
 
-  const handleVote = async (id, type) => {
+  const handleVote = async (id, type, previousType) => {
     try {
-      const response = await fetch(`/api/recipes/${id}/${type}`, { method: 'POST' });
-      if (response.ok) {
-        fetchRecipes();
-      } else {
-        alert('Fehler beim Voten.');
+      // If changing vote or removing vote, undo previous vote first
+      if (previousType) {
+        await fetch(`/api/recipes/${id}/remove_${previousType}`, { method: 'POST' });
       }
+
+      // If casting a new vote
+      if (type) {
+        const response = await fetch(`/api/recipes/${id}/${type}`, { method: 'POST' });
+        if (!response.ok) {
+           alert('Fehler beim Voten.');
+           return;
+        }
+      }
+
+      fetchRecipes();
     } catch (error) {
       console.error('Fehler beim Voten:', error);
     }

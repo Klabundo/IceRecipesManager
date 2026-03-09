@@ -86,6 +86,40 @@ app.post('/api/recipes/:id/downvote', (req, res) => {
     });
 });
 
+// 4a. Rezept Upvote entfernen
+app.post('/api/recipes/:id/remove_upvote', (req, res) => {
+    const recipeId = req.params.id;
+    const query = `UPDATE recipes SET upvotes = MAX(0, upvotes - 1) WHERE id = ?`;
+    db.run(query, [recipeId], function(err) {
+        if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
+        if (this.changes === 0) {
+            res.status(404).json({ error: 'Rezept nicht gefunden.' });
+            return;
+        }
+        res.json({ message: 'Upvote entfernt!' });
+    });
+});
+
+// 4b. Rezept Downvote entfernen
+app.post('/api/recipes/:id/remove_downvote', (req, res) => {
+    const recipeId = req.params.id;
+    const query = `UPDATE recipes SET downvotes = MAX(0, downvotes - 1) WHERE id = ?`;
+    db.run(query, [recipeId], function(err) {
+        if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
+        if (this.changes === 0) {
+            res.status(404).json({ error: 'Rezept nicht gefunden.' });
+            return;
+        }
+        res.json({ message: 'Downvote entfernt!' });
+    });
+});
+
 // 5. Kommentare zu einem Rezept abrufen
 app.get('/api/recipes/:id/comments', (req, res) => {
     const recipeId = req.params.id;

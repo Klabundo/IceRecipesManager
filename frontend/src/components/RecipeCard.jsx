@@ -7,19 +7,25 @@ function RecipeCard({ recipe, onVote, isManager, onEdit, onDelete }) {
   const [isImproving, setIsImproving] = useState(false);
   const [improvementSuggestion, setImprovementSuggestion] = useState(null);
   const [showQR, setShowQR] = useState(false);
+  const sessionKey = `voted_${recipe.id}`;
+  const [currentVote, setCurrentVote] = useState(() => sessionStorage.getItem(sessionKey));
 
   const score = recipe.upvotes - recipe.downvotes;
   const scoreClass =
     score > 0 ? 'score-positive' : score < 0 ? 'score-negative' : 'score-neutral';
 
   const handleVoteClick = (type) => {
-    const sessionKey = `voted_${recipe.id}`;
-    if (sessionStorage.getItem(sessionKey)) {
-      alert('Du hast für dieses Rezept bereits abgestimmt!');
-      return;
+    if (currentVote === type) {
+      // Toggle off vote
+      onVote(recipe.id, null, currentVote);
+      sessionStorage.removeItem(sessionKey);
+      setCurrentVote(null);
+    } else {
+      // New vote or change vote
+      onVote(recipe.id, type, currentVote);
+      sessionStorage.setItem(sessionKey, type);
+      setCurrentVote(type);
     }
-    onVote(recipe.id, type);
-    sessionStorage.setItem(sessionKey, 'true');
   };
 
   const handleCopyRecipe = async () => {
@@ -47,18 +53,30 @@ function RecipeCard({ recipe, onVote, isManager, onEdit, onDelete }) {
           </div>
         </div>
 
+        {isManager && (
+          <div className="recipe-body" style={{ marginTop: '1.5rem' }}>
+            <h4 style={{ marginTop: 0 }}>🛒 Einkaufszettel</h4>
+            <p>{recipe.ingredients}</p>
+
+            <h4>👩‍🍳 So wird's gemacht</h4>
+            <p>{recipe.instructions}</p>
+          </div>
+        )}
+
         <div className="recipe-actions">
           <button
-            className="btn btn-vote btn-up"
-            onClick={() => handleVoteClick('upvote')}
+            className={`btn btn-vote btn-up ${currentVote === 'upvote' ? 'active-vote' : ''}`}
+            onClick={(e) => { e.stopPropagation(); handleVoteClick('upvote'); }}
             title="Lecker!"
+            style={currentVote === 'upvote' ? { backgroundColor: 'var(--upvote-color)', color: 'white' } : {}}
           >
             😍 {recipe.upvotes}
           </button>
           <button
-            className="btn btn-vote btn-down"
-            onClick={() => handleVoteClick('downvote')}
+            className={`btn btn-vote btn-down ${currentVote === 'downvote' ? 'active-vote' : ''}`}
+            onClick={(e) => { e.stopPropagation(); handleVoteClick('downvote'); }}
             title="Schmeckt mir nicht"
+            style={currentVote === 'downvote' ? { backgroundColor: 'var(--downvote-color)', color: 'white' } : {}}
           >
             🤢 {recipe.downvotes}
           </button>
