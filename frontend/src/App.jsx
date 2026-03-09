@@ -22,6 +22,7 @@ function App() {
 
   useEffect(() => {
     fetchRecipes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleVote = async (id, type) => {

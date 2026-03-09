@@ -55,11 +55,6 @@ function AiSettings() {
     setHostUrl(newUrl);
   };
 
-  const handleHostUrlBlur = () => {
-    fetchModels(hostUrl);
-  };
-
-
   const handleSave = async (e) => {
     e.preventDefault();
     try {
@@ -114,36 +109,46 @@ function AiSettings() {
                     placeholder="http://localhost:11434"
                     value={hostUrl}
                     onChange={handleHostUrlChange}
-                    onBlur={handleHostUrlBlur}
                   />
                 </div>
 
                 <div className="form-group">
                   <label htmlFor="model">Model {isLoadingModels && '⏳'}</label>
-                  <input
-                    type="text"
-                    id="model"
-                    list="model-list"
-                    className="form-control"
-                    placeholder="z.B. llama3, mistral, gemma"
-                    value={model}
-                    onChange={(e) => setModel(e.target.value)}
-                  />
-                  <datalist id="model-list">
-                    {availableModels.map((m) => (
-                      <option key={m} value={m} />
-                    ))}
-                  </datalist>
-                  {availableModels.length > 0 && (
-                    <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: '#666' }}>
-                      <strong>Verfügbare Modelle:</strong>
-                      <ul style={{ paddingLeft: '1.2rem', marginTop: '0.2rem' }}>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    {availableModels.length > 0 ? (
+                      <select
+                        id="model"
+                        className="form-control"
+                        value={model}
+                        onChange={(e) => setModel(e.target.value)}
+                        style={{ flex: 1 }}
+                      >
+                        <option value="">-- Modell wählen --</option>
                         {availableModels.map((m) => (
-                          <li key={m}>{m}</li>
+                          <option key={m} value={m}>{m}</option>
                         ))}
-                      </ul>
-                    </div>
-                  )}
+                      </select>
+                    ) : (
+                      <input
+                        type="text"
+                        id="model"
+                        className="form-control"
+                        placeholder="z.B. llama3, mistral, gemma"
+                        value={model}
+                        onChange={(e) => setModel(e.target.value)}
+                        style={{ flex: 1 }}
+                      />
+                    )}
+                    <button
+                      type="button"
+                      className="btn"
+                      onClick={() => fetchModels(hostUrl)}
+                      disabled={isLoadingModels}
+                      style={{ padding: '0.5rem 1rem', whiteSpace: 'nowrap', backgroundColor: '#e0e0e0', color: '#333' }}
+                    >
+                      Modelle abrufen
+                    </button>
+                  </div>
                 </div>
 
                 <div className="form-group">
