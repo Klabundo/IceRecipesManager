@@ -1,11 +1,23 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-function RecipeForm({ onRecipeAdded }) {
+function RecipeForm({ onRecipeAdded, initialData, onCancelEdit }) {
   const [title, setTitle] = useState('');
   const [ingredients, setIngredients] = useState('');
   const [instructions, setInstructions] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+
+  useEffect(() => {
+    if (initialData) {
+      setTitle(initialData.title || '');
+      setIngredients(initialData.ingredients || '');
+      setInstructions(initialData.instructions || '');
+    } else {
+      setTitle('');
+      setIngredients('');
+      setInstructions('');
+    }
+  }, [initialData]);
 
   const handleGenerateRecipe = async () => {
     if (!title) {
@@ -59,8 +71,11 @@ function RecipeForm({ onRecipeAdded }) {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('/api/recipes', {
-        method: 'POST',
+      const url = initialData ? `/api/recipes/${initialData.id}` : '/api/recipes';
+      const method = initialData ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method: method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title, ingredients, instructions })
       });
@@ -70,7 +85,7 @@ function RecipeForm({ onRecipeAdded }) {
         setIngredients('');
         setInstructions('');
         onRecipeAdded();
-        alert('Rezept erfolgreich hinzugefügt!');
+        alert(initialData ? 'Rezept erfolgreich aktualisiert!' : 'Rezept erfolgreich hinzugefügt!');
       } else {
         const err = await response.json();
         alert('Fehler: ' + err.error);
@@ -85,6 +100,12 @@ function RecipeForm({ onRecipeAdded }) {
 
   return (
     <form onSubmit={handleSubmit} className="recipe-form">
+      {initialData && (
+        <div style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: '#e3f2fd', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <strong>Bearbeite Rezept: {initialData.title}</strong>
+          <button type="button" onClick={onCancelEdit} style={{ background: 'transparent', border: 'none', color: '#1976d2', cursor: 'pointer', fontWeight: 'bold' }}>Abbrechen ✕</button>
+        </div>
+      )}
       <div className="form-group" style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end' }}>
         <div style={{ flex: 1 }}>
           <label htmlFor="title">Eis-Titel</label>
@@ -133,7 +154,7 @@ function RecipeForm({ onRecipeAdded }) {
         ></textarea>
       </div>
       <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
-        {isSubmitting ? 'Wird gespeichert...' : 'Rezept teilen ✨'}
+        {isSubmitting ? 'Wird gespeichert...' : (initialData ? 'Änderungen speichern ✨' : 'Rezept teilen ✨')}
       </button>
     </form>
   );

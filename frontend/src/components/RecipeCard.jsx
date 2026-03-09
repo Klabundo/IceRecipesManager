@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import Comments from './Comments';
+import { QRCodeSVG } from 'qrcode.react';
 
-function RecipeCard({ recipe, onVote }) {
+function RecipeCard({ recipe, onVote, isManager, onEdit, onDelete }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isImproving, setIsImproving] = useState(false);
   const [improvementSuggestion, setImprovementSuggestion] = useState(null);
+  const [showQR, setShowQR] = useState(false);
 
   const score = recipe.upvotes - recipe.downvotes;
   const scoreClass =
@@ -65,7 +67,32 @@ function RecipeCard({ recipe, onVote }) {
         <div className="recipe-meta">
           Teilte das Rezept am: {new Date(recipe.created_at).toLocaleString('de-DE', { dateStyle: 'long', timeStyle: 'short' })}
         </div>
+
+        {isManager && (
+          <div className="recipe-manager-actions" style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}>
+            <button className="btn" onClick={(e) => { e.stopPropagation(); onEdit(); }} style={{ flex: 1, backgroundColor: '#4CAF50', color: 'white' }}>✏️ Bearbeiten</button>
+            <button className="btn" onClick={(e) => { e.stopPropagation(); onDelete(); }} style={{ flex: 1, backgroundColor: '#f44336', color: 'white' }}>🗑️ Löschen</button>
+            <button className="btn" onClick={(e) => { e.stopPropagation(); setShowQR(!showQR); }} style={{ flex: 1, backgroundColor: '#2196F3', color: 'white' }}>📷 QR</button>
+          </div>
+        )}
       </div>
+
+      {showQR && isManager && (
+        <div className="modal-overlay" onClick={() => setShowQR(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ textAlign: 'center' }}>
+            <div className="modal-header">
+              <h2>QR Code für Voting</h2>
+              <button className="modal-close" onClick={() => setShowQR(false)}>✖</button>
+            </div>
+            <div className="modal-body">
+              <p>Diesen Code können die Esser scannen, um abzustimmen!</p>
+              <div style={{ margin: '2rem 0', display: 'flex', justifyContent: 'center' }}>
+                <QRCodeSVG value={`${window.location.origin}/vote/${recipe.id}`} size={256} />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {isExpanded && (
         <div className="modal-overlay" onClick={() => setIsExpanded(false)}>
