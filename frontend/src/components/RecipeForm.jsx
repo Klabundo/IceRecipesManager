@@ -41,7 +41,7 @@ function RecipeForm({ onRecipeAdded }) {
         if (recipeData.title) setTitle(recipeData.title);
         if (recipeData.ingredients) setIngredients(recipeData.ingredients);
         if (recipeData.instructions) setInstructions(recipeData.instructions);
-      } catch (parseError) {
+      } catch {
         console.error('Konnte AI Antwort nicht als JSON parsen:', result.result);
         alert('Die KI hat kein gültiges JSON zurückgegeben. Bitte versuche es noch einmal.');
       }
