@@ -209,6 +209,35 @@ app.post('/api/recipes/:id/comments', (req, res) => {
 });
 
 
+
+// 6b. Delete all comments and ratings
+app.delete('/api/social-data', (req, res) => {
+    db.serialize(() => {
+        db.run('BEGIN TRANSACTION');
+        db.run('DELETE FROM comments', [], function(err) {
+            if (err) {
+                db.run('ROLLBACK');
+                res.status(500).json({ error: err.message });
+                return;
+            }
+            db.run('UPDATE recipes SET upvotes = 0, downvotes = 0', [], function(err) {
+                if (err) {
+                    db.run('ROLLBACK');
+                    res.status(500).json({ error: err.message });
+                    return;
+                }
+                db.run('COMMIT', (err) => {
+                    if (err) {
+                        res.status(500).json({ error: err.message });
+                    } else {
+                        res.json({ message: 'Alle Kommentare und Bewertungen erfolgreich gelöscht!' });
+                    }
+                });
+            });
+        });
+    });
+});
+
 // --- Settings ---
 app.get('/api/settings', (req, res) => {
     db.all('SELECT * FROM settings', [], (err, rows) => {

@@ -9,6 +9,7 @@ function RecipeForm({ onRecipeAdded, initialData, onCancelEdit }) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [aiEditPrompt, setAiEditPrompt] = useState('');
   const [isAiEditing, setIsAiEditing] = useState(false);
+  const [aiChanges, setAiChanges] = useState([]);
 
   useEffect(() => {
     if (initialData) {
@@ -138,7 +139,8 @@ Zubereitung: ${JSON.stringify(instructions)}
 
 Der Nutzer möchte folgendes ändern: "${aiEditPrompt}".
 Bitte gib das aktualisierte Rezept zurück. Achte weiterhin darauf, dass die genauen Mengen der Zutaten (z.B. Gramm, ml) auch im Text der Zubereitungsschritte (instructions) genannt werden.
-Antworte IMMER nur in folgendem JSON-Format: {"title": "Der Name des Eises", "ingredients": [{"name": "Zutat 1", "amount": "Menge 1"}, {"name": "Zutat 2", "amount": "Menge 2"}], "instructions": [{"step": "Schritt 1 (mit Mengenangabe)"}, {"step": "Schritt 2 (mit Mengenangabe)"}]}`
+Füge außerdem ein Array "changes" hinzu, in dem du zusammenfasst, was genau an den Zutaten oder Schritten hinzugefügt oder entfernt wurde.
+Antworte IMMER nur in folgendem JSON-Format: {"title": "Der Name des Eises", "ingredients": [{"name": "Zutat 1", "amount": "Menge 1"}, {"name": "Zutat 2", "amount": "Menge 2"}], "instructions": [{"step": "Schritt 1 (mit Mengenangabe)"}, {"step": "Schritt 2 (mit Mengenangabe)"}], "changes": [{"type": "add", "item": "Beispiel Hinzugefügt"}, {"type": "remove", "item": "Beispiel Entfernt"}]}`
         })
       });
 
@@ -157,6 +159,7 @@ Antworte IMMER nur in folgendem JSON-Format: {"title": "Der Name des Eises", "in
         if (recipeData.title) setTitle(recipeData.title);
         if (recipeData.ingredients) setIngredients(recipeData.ingredients);
         if (recipeData.instructions) setInstructions(recipeData.instructions);
+        if (recipeData.changes) setAiChanges(recipeData.changes);
         setAiEditPrompt('');
         toast.success('Rezept erfolgreich von der KI aktualisiert!');
       } catch {
@@ -173,6 +176,40 @@ Antworte IMMER nur in folgendem JSON-Format: {"title": "Der Name des Eises", "in
   };
 
   const hasContent = title.trim() !== '' || ingredients.some(i => i.name.trim() !== '') || instructions.some(i => i.step.trim() !== '');
+
+  const computeManualChanges = () => {
+    if (!initialData) return [];
+    const changes = [];
+
+    let originalIngredients = [];
+    try {
+      originalIngredients = JSON.parse(initialData.ingredients);
+    } catch {
+      return [];
+    }
+
+    const currentIngStrs = ingredients.filter(i => i.name.trim() !== '').map(i => `${i.amount ? i.amount + ' ' : ''}${i.name}`.trim().toLowerCase());
+    const originalIngStrs = originalIngredients.map(i => `${i.amount ? i.amount + ' ' : ''}${i.name}`.trim().toLowerCase());
+
+    currentIngStrs.forEach(ing => {
+      if (!originalIngStrs.includes(ing)) {
+        const origObj = ingredients.find(i => `${i.amount ? i.amount + ' ' : ''}${i.name}`.trim().toLowerCase() === ing);
+        changes.push({ type: 'add', item: `${origObj.amount ? origObj.amount + ' ' : ''}${origObj.name}`.trim() });
+      }
+    });
+
+    originalIngStrs.forEach(ing => {
+      if (!currentIngStrs.includes(ing)) {
+        const origObj = originalIngredients.find(i => `${i.amount ? i.amount + ' ' : ''}${i.name}`.trim().toLowerCase() === ing);
+        changes.push({ type: 'remove', item: `${origObj.amount ? origObj.amount + ' ' : ''}${origObj.name}`.trim() });
+      }
+    });
+
+    return changes;
+  };
+
+  const displayChanges = aiChanges.length > 0 ? aiChanges : computeManualChanges();
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -366,6 +403,28 @@ Antworte IMMER nur in folgendem JSON-Format: {"title": "Der Name des Eises", "in
           </button>
         </div>
       )}
+
+      {displayChanges && displayChanges.length > 0 && (
+        <div style={{ marginBottom: '1.5rem', padding: '1rem', backgroundColor: '#f5f5f5', borderRadius: 'var(--radius-md)', border: '1px solid #ddd' }}>
+          <h4 style={{ marginTop: 0, marginBottom: '0.5rem' }}>Änderungen:</h4>
+          <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {displayChanges.map((change, idx) => (
+              <li key={idx} style={{
+                color: change.type === 'add' ? '#2e7d32' : '#c62828',
+                backgroundColor: change.type === 'add' ? 'rgba(76, 175, 80, 0.1)' : 'rgba(244, 67, 54, 0.1)',
+                padding: '0.5rem',
+                borderRadius: '4px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}>
+                <strong>{change.type === 'add' ? '▲ +' : '▼ -'}</strong> {change.item}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
         {isSubmitting ? 'Wird gespeichert...' : (initialData ? 'Änderungen speichern ✨' : 'Rezept teilen ✨')}
       </button>
