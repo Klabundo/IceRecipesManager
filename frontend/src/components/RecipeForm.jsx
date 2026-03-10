@@ -172,6 +172,8 @@ Antworte IMMER nur in folgendem JSON-Format: {"title": "Der Name des Eises", "in
     }
   };
 
+  const hasContent = title.trim() !== '' || ingredients.some(i => i.name.trim() !== '') || instructions.some(i => i.step.trim() !== '');
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -240,28 +242,6 @@ Antworte IMMER nur in folgendem JSON-Format: {"title": "Der Name des Eises", "in
           style={{ backgroundColor: '#ff9800', color: 'white', padding: '0.5rem 1rem' }}
         >
           {isGenerating ? 'Generiere...' : '✨ KI Generieren'}
-        </button>
-      </div>
-      <div className="form-group" style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end', marginTop: '1rem', marginBottom: '1.5rem', padding: '1rem', backgroundColor: '#f5f5f5', borderRadius: '8px' }}>
-        <div style={{ flex: 1 }}>
-          <label htmlFor="aiEdit">KI Rezept-Chat (Änderungswünsche)</label>
-          <input
-            type="text"
-            id="aiEdit"
-            className="form-control"
-            placeholder='z.B. "Mache das Karamell selber" oder "Ersetze Zucker durch Honig"'
-            value={aiEditPrompt}
-            onChange={(e) => setAiEditPrompt(e.target.value)}
-          />
-        </div>
-        <button
-          type="button"
-          className="btn"
-          onClick={handleAiEdit}
-          disabled={isAiEditing || isSubmitting || isGenerating}
-          style={{ backgroundColor: '#2196F3', color: 'white', padding: '0.5rem 1rem' }}
-        >
-          {isAiEditing ? 'Wende an...' : '💬 KI Anwenden'}
         </button>
       </div>
       <div className="form-group">
@@ -361,6 +341,31 @@ Antworte IMMER nur in folgendem JSON-Format: {"title": "Der Name des Eises", "in
           + Schritt hinzufügen
         </button>
       </div>
+      {hasContent && (
+        <div className="form-group" style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end', marginTop: '1.5rem', marginBottom: '1.5rem', padding: '1.5rem', backgroundColor: 'var(--bg-color)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)' }}>
+          <div style={{ flex: 1 }}>
+            <label htmlFor="aiEdit">KI Rezept-Chat (Änderungswünsche)</label>
+            <input
+              type="text"
+              id="aiEdit"
+              className="form-control"
+              placeholder='z.B. "Mache das Karamell selber" oder "Ersetze Zucker durch Honig"'
+              value={aiEditPrompt}
+              onChange={(e) => setAiEditPrompt(e.target.value)}
+              style={{ backgroundColor: 'var(--card-bg)' }}
+            />
+          </div>
+          <button
+            type="button"
+            className="btn"
+            onClick={handleAiEdit}
+            disabled={isAiEditing || isSubmitting || isGenerating}
+            style={{ backgroundColor: 'var(--primary-color)', color: 'white', padding: '0.5rem 1.5rem' }}
+          >
+            {isAiEditing ? 'Wende an...' : '💬 KI Anwenden'}
+          </button>
+        </div>
+      )}
       <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
         {isSubmitting ? 'Wird gespeichert...' : (initialData ? 'Änderungen speichern ✨' : 'Rezept teilen ✨')}
       </button>
