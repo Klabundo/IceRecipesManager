@@ -73,6 +73,54 @@ function RecipeCard({ recipe, onVote, isManager, onEdit, onDelete }) {
 
   const instructionSteps = getInstructionSteps();
 
+  const getIngredientsList = () => {
+    try {
+      const parsed = JSON.parse(recipe.ingredients);
+      if (Array.isArray(parsed)) {
+        return parsed;
+      }
+    } catch {
+      // Fallback
+    }
+    return [];
+  };
+
+  const ingredientsList = getIngredientsList();
+
+  const getIngredientsForStep = (stepText) => {
+    if (!stepText || ingredientsList.length === 0) return [];
+    const lowerStep = stepText.toLowerCase();
+
+    // Sort by length descending to match longer ingredient names first (e.g. "brauner Zucker" before "Zucker")
+    const sortedIngredients = [...ingredientsList].sort((a, b) => b.name.length - a.name.length);
+
+    const matched = [];
+    const usedMatches = new Set();
+
+    sortedIngredients.forEach(ing => {
+      if (!ing.name) return;
+      const lowerName = ing.name.toLowerCase();
+      // Simple string matching, checking if ingredient name is in the step text
+      if (lowerStep.includes(lowerName)) {
+        // Prevent matching both "Zucker" and "Vanillezucker" if only "Vanillezucker" is present,
+        // though includes() generally handles substrings, sorting by length first helps here.
+        let isSubMatch = false;
+        usedMatches.forEach(match => {
+          if (match.toLowerCase().includes(lowerName)) {
+            isSubMatch = true;
+          }
+        });
+
+        if (!isSubMatch) {
+          matched.push(ing);
+          usedMatches.add(ing.name);
+        }
+      }
+    });
+
+    return matched;
+  };
+
   const renderIngredients = () => {
     try {
       const parsed = JSON.parse(recipe.ingredients);
@@ -270,20 +318,55 @@ function RecipeCard({ recipe, onVote, isManager, onEdit, onDelete }) {
                     👩‍🍳 Schritt {currentStep + 1} von {instructionSteps.length}
                   </h4>
 
-                  <div style={{
-                    fontSize: '1.2rem',
-                    padding: '2rem',
-                    textAlign: 'center',
-                    backgroundColor: 'var(--bg-color)',
-                    borderRadius: 'var(--radius-md)',
-                    minHeight: '150px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    lineHeight: '1.6'
-                  }}>
-                    {instructionSteps[currentStep]}
-                  </div>
+                  {(() => {
+                    const stepIngredients = getIngredientsForStep(instructionSteps[currentStep]);
+                    return (
+                      <div style={{
+                        fontSize: '1.2rem',
+                        padding: '2rem',
+                        textAlign: 'center',
+                        backgroundColor: 'var(--bg-color)',
+                        borderRadius: 'var(--radius-md)',
+                        minHeight: '150px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        lineHeight: '1.6'
+                      }}>
+                        {stepIngredients.length > 0 && (
+                          <div style={{
+                            display: 'flex',
+                            flexWrap: 'wrap',
+                            gap: '0.5rem',
+                            justifyContent: 'center',
+                            marginBottom: '1.5rem',
+                            width: '100%'
+                          }}>
+                            {stepIngredients.map((ing, idx) => (
+                              <div key={idx} style={{
+                                backgroundColor: 'var(--primary-color, #4CAF50)',
+                                color: 'white',
+                                padding: '0.5rem 1rem',
+                                borderRadius: '2rem',
+                                fontSize: '0.9rem',
+                                fontWeight: 'bold',
+                                display: 'inline-flex',
+                                gap: '0.5rem',
+                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                              }}>
+                                {ing.amount && <span>{ing.amount}</span>}
+                                <span>{ing.name}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        <div>
+                          {instructionSteps[currentStep]}
+                        </div>
+                      </div>
+                    );
+                  })()}
 
                   <div style={{ display: 'flex', gap: '1rem', marginTop: '2.5rem' }}>
                     <button
