@@ -73,6 +73,54 @@ function RecipeCard({ recipe, onVote, isManager, onEdit, onDelete }) {
 
   const instructionSteps = getInstructionSteps();
 
+  const getIngredientsList = () => {
+    try {
+      const parsed = JSON.parse(recipe.ingredients);
+      if (Array.isArray(parsed)) {
+        return parsed;
+      }
+    } catch {
+      // Fallback
+    }
+    return [];
+  };
+
+  const ingredientsList = getIngredientsList();
+
+  const getIngredientsForStep = (stepText) => {
+    if (!stepText || ingredientsList.length === 0) return [];
+    const lowerStep = stepText.toLowerCase();
+
+    // Sort by length descending to match longer ingredient names first (e.g. "brauner Zucker" before "Zucker")
+    const sortedIngredients = [...ingredientsList].sort((a, b) => b.name.length - a.name.length);
+
+    const matched = [];
+    const usedMatches = new Set();
+
+    sortedIngredients.forEach(ing => {
+      if (!ing.name) return;
+      const lowerName = ing.name.toLowerCase();
+      // Simple string matching, checking if ingredient name is in the step text
+      if (lowerStep.includes(lowerName)) {
+        // Prevent matching both "Zucker" and "Vanillezucker" if only "Vanillezucker" is present,
+        // though includes() generally handles substrings, sorting by length first helps here.
+        let isSubMatch = false;
+        usedMatches.forEach(match => {
+          if (match.toLowerCase().includes(lowerName)) {
+            isSubMatch = true;
+          }
+        });
+
+        if (!isSubMatch) {
+          matched.push(ing);
+          usedMatches.add(ing.name);
+        }
+      }
+    });
+
+    return matched;
+  };
+
   const renderIngredients = () => {
     try {
       const parsed = JSON.parse(recipe.ingredients);
@@ -225,16 +273,26 @@ function RecipeCard({ recipe, onVote, isManager, onEdit, onDelete }) {
                             hostUrl,
                             model,
                             systemPrompt:
-                              'Du bist ein Experte für Eisrezepte. Deine Aufgabe ist es, anhand eines Rezepts und der dazugehörigen Nutzerkommentare eine kurze, konkrete Verbesserung oder Abwandlung vorzuschlagen.',
+                              'Du bist ein Experte für Eisrezepte. Deine Aufgabe ist es, anhand eines Rezepts und der dazugehörigen Nutzerkommentare eine kurze, konkrete Verbesserung oder Abwandlung vorzuschlagen. Du musst IMMER in folgendem JSON-Format antworten: {"text": "Deine kurze Erklärung", "changes": [{"type": "add", "item": "Zutat oder Schritt hinzufügen"}, {"type": "remove", "item": "Zutat oder Schritt entfernen"}]}',
                             userPrompt: `Rezept Titel: ${recipe.title}\nZutaten: ${getIngredientsText()}\nZubereitung: ${instructionSteps.join('\n')}\n\nNutzerkommentare:\n${
                               commentsList || 'Keine Kommentare vorhanden.'
-                            }\n\nSchlage eine Verbesserung vor:`,
+                            }\n\nSchlage eine Verbesserung vor. WICHTIG: Antworte NUR im JSON Format.`,
                           }),
                         });
 
                         if (!response.ok) throw new Error('Fehler bei der KI-Anfrage');
                         const result = await response.json();
-                        setImprovementSuggestion(result.result);
+
+                        try {
+                          const content = result.result;
+                          const jsonStr = content.replace(/```json\n?|\n?```/gi, '').trim();
+                          const parsedSuggestion = JSON.parse(jsonStr);
+                          setImprovementSuggestion(parsedSuggestion);
+                        } catch (e) {
+                          console.error('Konnte AI Antwort nicht als JSON parsen:', result.result, e);
+                          // Fallback to text only if it fails to parse
+                          setImprovementSuggestion({ text: result.result, changes: [] });
+                        }
                       } catch (error) {
                         console.error('Fehler bei AI Verbesserung:', error);
                         toast.error('Konnte keinen Verbesserungsvorschlag generieren.');
@@ -252,13 +310,41 @@ function RecipeCard({ recipe, onVote, isManager, onEdit, onDelete }) {
                     <div
                       style={{
                         marginTop: '1rem',
-                        padding: '1rem',
+                        padding: '1.5rem',
                         backgroundColor: '#e3f2fd',
-                        borderRadius: '4px',
+                        borderRadius: 'var(--radius-md)',
                       }}
                     >
-                      <h5>💡 KI Vorschlag:</h5>
-                      <p>{improvementSuggestion}</p>
+                      <h5 style={{ marginTop: 0, marginBottom: '0.5rem', fontSize: '1.1rem' }}>💡 KI Vorschlag:</h5>
+                      <p style={{ marginBottom: '1rem' }}>{improvementSuggestion.text}</p>
+
+                      {improvementSuggestion.changes && improvementSuggestion.changes.length > 0 && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                          {improvementSuggestion.changes.map((change, idx) => {
+                            const isAdd = change.type === 'add';
+                            return (
+                              <div
+                                key={idx}
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '0.5rem',
+                                  padding: '0.5rem 1rem',
+                                  backgroundColor: isAdd ? 'rgba(76, 175, 80, 0.1)' : 'rgba(244, 67, 54, 0.1)',
+                                  color: isAdd ? '#2e7d32' : '#c62828',
+                                  borderRadius: 'var(--radius-sm)',
+                                  fontWeight: '500'
+                                }}
+                              >
+                                <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>
+                                  {isAdd ? '▲' : '▼'}
+                                </span>
+                                <span>{isAdd ? '+' : '-'} {change.item}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -270,20 +356,55 @@ function RecipeCard({ recipe, onVote, isManager, onEdit, onDelete }) {
                     👩‍🍳 Schritt {currentStep + 1} von {instructionSteps.length}
                   </h4>
 
-                  <div style={{
-                    fontSize: '1.2rem',
-                    padding: '2rem',
-                    textAlign: 'center',
-                    backgroundColor: 'var(--bg-color)',
-                    borderRadius: 'var(--radius-md)',
-                    minHeight: '150px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    lineHeight: '1.6'
-                  }}>
-                    {instructionSteps[currentStep]}
-                  </div>
+                  {(() => {
+                    const stepIngredients = getIngredientsForStep(instructionSteps[currentStep]);
+                    return (
+                      <div style={{
+                        fontSize: '1.2rem',
+                        padding: '2rem',
+                        textAlign: 'center',
+                        backgroundColor: 'var(--bg-color)',
+                        borderRadius: 'var(--radius-md)',
+                        minHeight: '150px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        lineHeight: '1.6'
+                      }}>
+                        {stepIngredients.length > 0 && (
+                          <div style={{
+                            display: 'flex',
+                            flexWrap: 'wrap',
+                            gap: '0.5rem',
+                            justifyContent: 'center',
+                            marginBottom: '1.5rem',
+                            width: '100%'
+                          }}>
+                            {stepIngredients.map((ing, idx) => (
+                              <div key={idx} style={{
+                                backgroundColor: 'var(--primary-color, #4CAF50)',
+                                color: 'white',
+                                padding: '0.5rem 1rem',
+                                borderRadius: '2rem',
+                                fontSize: '0.9rem',
+                                fontWeight: 'bold',
+                                display: 'inline-flex',
+                                gap: '0.5rem',
+                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                              }}>
+                                {ing.amount && <span>{ing.amount}</span>}
+                                <span>{ing.name}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        <div>
+                          {instructionSteps[currentStep]}
+                        </div>
+                      </div>
+                    );
+                  })()}
 
                   <div style={{ display: 'flex', gap: '1rem', marginTop: '2.5rem' }}>
                     <button
