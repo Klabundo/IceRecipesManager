@@ -7,6 +7,8 @@ function RecipeForm({ onRecipeAdded, initialData, onCancelEdit }) {
   const [instructions, setInstructions] = useState([{ step: '' }]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [aiEditPrompt, setAiEditPrompt] = useState('');
+  const [isAiEditing, setIsAiEditing] = useState(false);
 
   useEffect(() => {
     if (initialData) {
@@ -82,7 +84,7 @@ function RecipeForm({ onRecipeAdded, initialData, onCancelEdit }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userPrompt: `${existingRecipesContext}Generiere ein Eisrezept für die Idee "${title}". Antworte IMMER nur in folgendem JSON-Format: {"title": "Der Name des Eises", "ingredients": [{"name": "Zutat 1", "amount": "Menge 1"}, {"name": "Zutat 2", "amount": "Menge 2"}], "instructions": [{"step": "Schritt 1"}, {"step": "Schritt 2"}]}`
+          userPrompt: `${existingRecipesContext}Generiere ein Eisrezept für die Idee "${title}". Achte darauf, dass die genauen Mengen der Zutaten (z.B. Gramm, ml) auch im Text der Zubereitungsschritte (instructions) genannt werden. Antworte IMMER nur in folgendem JSON-Format: {"title": "Der Name des Eises", "ingredients": [{"name": "Zutat 1", "amount": "Menge 1"}, {"name": "Zutat 2", "amount": "Menge 2"}], "instructions": [{"step": "Schritt 1 (mit Mengenangabe)"}, {"step": "Schritt 2 (mit Mengenangabe)"}]}`
         })
       });
 
@@ -113,6 +115,60 @@ function RecipeForm({ onRecipeAdded, initialData, onCancelEdit }) {
       toast.error(error.message);
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const handleAiEdit = async () => {
+    if (!aiEditPrompt) {
+      toast.error('Bitte gib an, was die KI am Rezept ändern soll.');
+      return;
+    }
+
+    setIsAiEditing(true);
+
+    try {
+      const response = await fetch('/api/ai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userPrompt: `Das aktuelle Rezept lautet:
+Titel: ${title}
+Zutaten: ${JSON.stringify(ingredients)}
+Zubereitung: ${JSON.stringify(instructions)}
+
+Der Nutzer möchte folgendes ändern: "${aiEditPrompt}".
+Bitte gib das aktualisierte Rezept zurück. Achte weiterhin darauf, dass die genauen Mengen der Zutaten (z.B. Gramm, ml) auch im Text der Zubereitungsschritte (instructions) genannt werden.
+Antworte IMMER nur in folgendem JSON-Format: {"title": "Der Name des Eises", "ingredients": [{"name": "Zutat 1", "amount": "Menge 1"}, {"name": "Zutat 2", "amount": "Menge 2"}], "instructions": [{"step": "Schritt 1 (mit Mengenangabe)"}, {"step": "Schritt 2 (mit Mengenangabe)"}]}`
+        })
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error || 'Fehler bei der AI Bearbeitung');
+      }
+
+      const result = await response.json();
+
+      try {
+        const content = result.result;
+        const jsonStr = content.replace(/```json\n?|\n?```/gi, '').trim();
+        const recipeData = JSON.parse(jsonStr);
+
+        if (recipeData.title) setTitle(recipeData.title);
+        if (recipeData.ingredients) setIngredients(recipeData.ingredients);
+        if (recipeData.instructions) setInstructions(recipeData.instructions);
+        setAiEditPrompt('');
+        toast.success('Rezept erfolgreich von der KI aktualisiert!');
+      } catch {
+        console.error('Konnte AI Antwort nicht als JSON parsen:', result.result);
+        toast.error('Die KI hat kein gültiges JSON zurückgegeben. Bitte versuche es noch einmal.');
+      }
+
+    } catch (error) {
+      console.error('Fehler bei der Bearbeitung:', error);
+      toast.error(error.message);
+    } finally {
+      setIsAiEditing(false);
     }
   };
 
@@ -184,6 +240,28 @@ function RecipeForm({ onRecipeAdded, initialData, onCancelEdit }) {
           style={{ backgroundColor: '#ff9800', color: 'white', padding: '0.5rem 1rem' }}
         >
           {isGenerating ? 'Generiere...' : '✨ KI Generieren'}
+        </button>
+      </div>
+      <div className="form-group" style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end', marginTop: '1rem', marginBottom: '1.5rem', padding: '1rem', backgroundColor: '#f5f5f5', borderRadius: '8px' }}>
+        <div style={{ flex: 1 }}>
+          <label htmlFor="aiEdit">KI Rezept-Chat (Änderungswünsche)</label>
+          <input
+            type="text"
+            id="aiEdit"
+            className="form-control"
+            placeholder='z.B. "Mache das Karamell selber" oder "Ersetze Zucker durch Honig"'
+            value={aiEditPrompt}
+            onChange={(e) => setAiEditPrompt(e.target.value)}
+          />
+        </div>
+        <button
+          type="button"
+          className="btn"
+          onClick={handleAiEdit}
+          disabled={isAiEditing || isSubmitting || isGenerating}
+          style={{ backgroundColor: '#2196F3', color: 'white', padding: '0.5rem 1rem' }}
+        >
+          {isAiEditing ? 'Wende an...' : '💬 KI Anwenden'}
         </button>
       </div>
       <div className="form-group">
