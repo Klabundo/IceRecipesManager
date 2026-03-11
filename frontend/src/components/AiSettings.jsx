@@ -56,6 +56,26 @@ function AiSettings() {
     setHostUrl(newUrl);
   };
 
+  const handleResetSocialData = async () => {
+    if (window.confirm('Möchtest du wirklich alle Kommentare und Bewertungen löschen? Dies kann nicht rückgängig gemacht werden.')) {
+      try {
+        const response = await fetch('/api/social-data', { method: 'DELETE' });
+        if (response.ok) {
+          sessionStorage.clear();
+          toast.success('Alle Kommentare und Bewertungen wurden gelöscht.');
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
+        } else {
+          toast.error('Fehler beim Löschen der Daten.');
+        }
+      } catch (error) {
+        console.error('Fehler beim Löschen:', error);
+        toast.error('Netzwerkfehler beim Löschen der Daten.');
+      }
+    }
+  };
+
   const handleSave = async (e) => {
     e.preventDefault();
     try {
@@ -86,7 +106,7 @@ function AiSettings() {
       <button
         className="settings-gear-btn"
         onClick={() => setIsOpen(true)}
-        title="AI Einstellungen"
+        title="AI & Daten Einstellungen"
       >
         ⚙️
       </button>
@@ -95,7 +115,7 @@ function AiSettings() {
         <div className="modal-overlay" onClick={() => setIsOpen(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>🤖 AI Einstellungen</h2>
+              <h2>🤖 AI & Daten Einstellungen</h2>
               <button className="modal-close" onClick={() => setIsOpen(false)}>✖</button>
             </div>
 
@@ -163,10 +183,33 @@ function AiSettings() {
                   ></textarea>
                 </div>
 
-                <button type="submit" className="btn btn-primary" style={{ marginTop: '1rem' }}>
+                <button type="submit" className="btn btn-primary" style={{ marginTop: '1rem', width: '100%' }}>
                   Einstellungen speichern 💾
                 </button>
               </form>
+
+              <div style={{ marginTop: '2rem', borderTop: '1px solid #eee', paddingTop: '1rem' }}>
+                <h3 style={{ fontSize: '1.2rem', marginBottom: '1rem', color: '#d32f2f' }}>⚠️ Datenverwaltung</h3>
+                <button
+                  type="button"
+                  className="btn"
+                  onClick={handleResetSocialData}
+                  style={{
+                    backgroundColor: '#ffebee',
+                    color: '#c62828',
+                    border: '1px solid #ffcdd2',
+                    padding: '0.75rem',
+                    width: '100%',
+                    fontWeight: 'bold',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.5rem'
+                  }}
+                >
+                  <span>🗑️</span> Alle Kommentare & Bewertungen löschen
+                </button>
+              </div>
             </div>
           </div>
         </div>
