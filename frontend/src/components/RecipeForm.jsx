@@ -253,9 +253,9 @@ Antworte IMMER nur in folgendem JSON-Format: {"title": "Der Name des Eises", "in
   return (
     <form onSubmit={handleSubmit} className="recipe-form">
       {initialData && (
-        <div style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: '#e3f2fd', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: 'var(--info-bg)', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <strong>Bearbeite Rezept: {initialData.title}</strong>
-          <button type="button" onClick={onCancelEdit} style={{ background: 'transparent', border: 'none', color: '#1976d2', cursor: 'pointer', fontWeight: 'bold' }}>Abbrechen ✕</button>
+          <button type="button" onClick={onCancelEdit} style={{ background: 'transparent', border: 'none', color: 'var(--info-color)', cursor: 'pointer', fontWeight: 'bold' }}>Abbrechen ✕</button>
         </div>
       )}
       <div className="form-group" style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end' }}>
@@ -276,7 +276,7 @@ Antworte IMMER nur in folgendem JSON-Format: {"title": "Der Name des Eises", "in
           className="btn"
           onClick={handleGenerateRecipe}
           disabled={isGenerating || isSubmitting}
-          style={{ backgroundColor: '#ff9800', color: 'white', padding: '0.5rem 1rem' }}
+          style={{ backgroundColor: 'var(--warning-color)', color: 'white', padding: '0.5rem 1rem' }}
         >
           {isGenerating ? 'Generiere...' : '✨ KI Generieren'}
         </button>
@@ -319,7 +319,7 @@ Antworte IMMER nur in folgendem JSON-Format: {"title": "Der Name des Eises", "in
                   newIng.splice(index, 1);
                   setIngredients(newIng);
                 }}
-                style={{ padding: '0.5rem', backgroundColor: '#f44336', color: 'white' }}
+                style={{ padding: '0.5rem', backgroundColor: 'var(--danger-color)', color: 'white' }}
               >
                 ✕
               </button>
@@ -330,7 +330,7 @@ Antworte IMMER nur in folgendem JSON-Format: {"title": "Der Name des Eises", "in
           type="button"
           className="btn"
           onClick={() => setIngredients([...ingredients, { name: '', amount: '' }])}
-          style={{ marginTop: '0.5rem', padding: '0.5rem 1rem', fontSize: '0.9rem', backgroundColor: '#e0e0e0' }}
+          style={{ marginTop: '0.5rem', padding: '0.5rem 1rem', fontSize: '0.9rem', backgroundColor: 'var(--border-light)' }}
         >
           + Zutat hinzufügen
         </button>
@@ -362,7 +362,7 @@ Antworte IMMER nur in folgendem JSON-Format: {"title": "Der Name des Eises", "in
                   newInst.splice(index, 1);
                   setInstructions(newInst);
                 }}
-                style={{ padding: '0.5rem', backgroundColor: '#f44336', color: 'white', marginTop: '0.5rem' }}
+                style={{ padding: '0.5rem', backgroundColor: 'var(--danger-color)', color: 'white', marginTop: '0.5rem' }}
               >
                 ✕
               </button>
@@ -373,7 +373,7 @@ Antworte IMMER nur in folgendem JSON-Format: {"title": "Der Name des Eises", "in
           type="button"
           className="btn"
           onClick={() => setInstructions([...instructions, { step: '' }])}
-          style={{ marginTop: '0.5rem', padding: '0.5rem 1rem', fontSize: '0.9rem', backgroundColor: '#e0e0e0' }}
+          style={{ marginTop: '0.5rem', padding: '0.5rem 1rem', fontSize: '0.9rem', backgroundColor: 'var(--border-light)' }}
         >
           + Schritt hinzufügen
         </button>
@@ -405,13 +405,13 @@ Antworte IMMER nur in folgendem JSON-Format: {"title": "Der Name des Eises", "in
       )}
 
       {displayChanges && displayChanges.length > 0 && (
-        <div style={{ marginBottom: '1.5rem', padding: '1rem', backgroundColor: '#f5f5f5', borderRadius: 'var(--radius-md)', border: '1px solid #ddd' }}>
+        <div style={{ marginBottom: '1.5rem', padding: '1rem', backgroundColor: 'var(--bg-color)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)' }}>
           <h4 style={{ marginTop: 0, marginBottom: '0.5rem' }}>Änderungen:</h4>
           <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             {displayChanges.map((change, idx) => (
               <li key={idx} style={{
-                color: change.type === 'add' ? '#2e7d32' : '#c62828',
-                backgroundColor: change.type === 'add' ? 'rgba(76, 175, 80, 0.1)' : 'rgba(244, 67, 54, 0.1)',
+                color: change.type === 'add' ? 'var(--success-color)' : 'var(--danger-color)',
+                backgroundColor: change.type === 'add' ? 'var(--success-bg)' : 'var(--danger-bg)',
                 padding: '0.5rem',
                 borderRadius: '4px',
                 display: 'flex',

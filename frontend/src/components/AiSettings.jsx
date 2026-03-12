@@ -49,7 +49,7 @@ function AiSettings() {
     if (isOpen) {
       fetchModels(hostUrl);
     }
-  }, [isOpen]);
+  }, [isOpen, hostUrl]);
 
   const handleHostUrlChange = (e) => {
     const newUrl = e.target.value;
@@ -165,7 +165,7 @@ function AiSettings() {
                       className="btn"
                       onClick={() => fetchModels(hostUrl)}
                       disabled={isLoadingModels}
-                      style={{ padding: '0.5rem 1rem', whiteSpace: 'nowrap', backgroundColor: '#e0e0e0', color: '#333' }}
+                      style={{ padding: '0.5rem 1rem', whiteSpace: 'nowrap', backgroundColor: 'var(--border-light)', color: 'var(--text-main)' }}
                     >
                       Modelle abrufen
                     </button>
@@ -188,16 +188,16 @@ function AiSettings() {
                 </button>
               </form>
 
-              <div style={{ marginTop: '2rem', borderTop: '1px solid #eee', paddingTop: '1rem' }}>
-                <h3 style={{ fontSize: '1.2rem', marginBottom: '1rem', color: '#d32f2f' }}>⚠️ Datenverwaltung</h3>
+              <div style={{ marginTop: '2rem', borderTop: '1px solid var(--border-light)', paddingTop: '1rem' }}>
+                <h3 style={{ fontSize: '1.2rem', marginBottom: '1rem', color: 'var(--danger-color)' }}>⚠️ Datenverwaltung</h3>
                 <button
                   type="button"
                   className="btn"
                   onClick={handleResetSocialData}
                   style={{
-                    backgroundColor: '#ffebee',
-                    color: '#c62828',
-                    border: '1px solid #ffcdd2',
+                    backgroundColor: 'var(--danger-bg)',
+                    color: 'var(--danger-color)',
+                    border: '1px solid var(--danger-color)',
                     padding: '0.75rem',
                     width: '100%',
                     fontWeight: 'bold',

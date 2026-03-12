@@ -74,7 +74,7 @@ function PublicView() {
       </section>
 
       <section className="list-section">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingLeft: '1rem', marginTop: '1rem', marginBottom: '1.5rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem', marginBottom: '1.5rem' }}>
           <h2 className="section-title" style={{ margin: 0 }}>
             🍨 Community Favoriten
           </h2>
