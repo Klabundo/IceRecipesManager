@@ -1,12 +1,12 @@
 import toast from "react-hot-toast";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 function Comments({ recipeId }) {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const fetchComments = async () => {
+  const fetchComments = useCallback(async () => {
     try {
       const response = await fetch(`/api/recipes/${recipeId}/comments`);
       const result = await response.json();
@@ -14,11 +14,11 @@ function Comments({ recipeId }) {
     } catch (error) {
       console.error('Fehler beim Laden der Kommentare:', error);
     }
-  };
+  }, [recipeId]);
 
   useEffect(() => {
     fetchComments();
-  }, [recipeId]);
+  }, [fetchComments]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

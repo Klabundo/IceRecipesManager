@@ -63,7 +63,7 @@ function CommentPage() {
             type="button"
             className="btn"
             onClick={handleSkip}
-            style={{ backgroundColor: '#ccc', color: '#333' }}
+            style={{ backgroundColor: 'var(--border-light)', color: 'var(--text-main)' }}
           >
             Überspringen
           </button>

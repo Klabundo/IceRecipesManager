@@ -240,9 +240,9 @@ function RecipeCard({ recipe, onVote, isManager, onEdit, onDelete }) {
 
                   {isManager && (
                     <div className="recipe-manager-actions" style={{ marginTop: '2rem', display: 'flex', gap: '0.5rem', borderTop: '1px solid var(--border-light)', paddingTop: '1.5rem' }}>
-                      <button className="btn" onClick={(e) => { e.stopPropagation(); closeExpanded(); onEdit(recipe); }} style={{ flex: 1, backgroundColor: '#4CAF50', color: 'white' }}>✏️ Bearbeiten</button>
-                      <button className="btn" onClick={(e) => { e.stopPropagation(); closeExpanded(); onDelete(recipe.id); }} style={{ flex: 1, backgroundColor: '#f44336', color: 'white' }}>🗑️ Löschen</button>
-                      <button className="btn" onClick={(e) => { e.stopPropagation(); closeExpanded(); setShowQR(true); }} style={{ flex: 1, backgroundColor: '#2196F3', color: 'white' }}>📷 QR Code</button>
+                      <button className="btn" onClick={(e) => { e.stopPropagation(); closeExpanded(); onEdit(recipe); }} style={{ flex: 1, backgroundColor: 'var(--success-color)', color: 'white' }}>✏️ Bearbeiten</button>
+                      <button className="btn" onClick={(e) => { e.stopPropagation(); closeExpanded(); onDelete(recipe.id); }} style={{ flex: 1, backgroundColor: 'var(--danger-color)', color: 'white' }}>🗑️ Löschen</button>
+                      <button className="btn" onClick={(e) => { e.stopPropagation(); closeExpanded(); setShowQR(true); }} style={{ flex: 1, backgroundColor: 'var(--info-color)', color: 'white' }}>📷 QR Code</button>
                     </div>
                   )}
 
@@ -301,7 +301,7 @@ function RecipeCard({ recipe, onVote, isManager, onEdit, onDelete }) {
                       }
                     }}
                     disabled={isImproving}
-                    style={{ backgroundColor: '#2196F3', color: 'white', marginTop: '1rem', width: '100%' }}
+                    style={{ backgroundColor: 'var(--info-color)', color: 'white', marginTop: '1rem', width: '100%' }}
                   >
                     {isImproving ? 'Analysiere...' : '💡 KI Verbesserungsvorschlag'}
                   </button>
@@ -311,7 +311,7 @@ function RecipeCard({ recipe, onVote, isManager, onEdit, onDelete }) {
                       style={{
                         marginTop: '1rem',
                         padding: '1.5rem',
-                        backgroundColor: '#e3f2fd',
+                        backgroundColor: 'var(--info-bg)',
                         borderRadius: 'var(--radius-md)',
                       }}
                     >
@@ -330,8 +330,8 @@ function RecipeCard({ recipe, onVote, isManager, onEdit, onDelete }) {
                                   alignItems: 'center',
                                   gap: '0.5rem',
                                   padding: '0.5rem 1rem',
-                                  backgroundColor: isAdd ? 'rgba(76, 175, 80, 0.1)' : 'rgba(244, 67, 54, 0.1)',
-                                  color: isAdd ? '#2e7d32' : '#c62828',
+                                  backgroundColor: isAdd ? 'var(--success-bg)' : 'var(--danger-bg)',
+                                  color: isAdd ? 'var(--success-color)' : 'var(--danger-color)',
                                   borderRadius: 'var(--radius-sm)',
                                   fontWeight: '500'
                                 }}
@@ -383,7 +383,7 @@ function RecipeCard({ recipe, onVote, isManager, onEdit, onDelete }) {
                           }}>
                             {stepIngredients.map((ing, idx) => (
                               <div key={idx} style={{
-                                backgroundColor: 'var(--primary-color, #4CAF50)',
+                                backgroundColor: 'var(--success-color)',
                                 color: 'white',
                                 padding: '0.5rem 1rem',
                                 borderRadius: '2rem',
